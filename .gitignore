@@ -1,0 +1,24 @@
+# Node.js Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment Variables
+.env
+server/.env
+
+# User Uploaded Files
+server/uploads/
+
+# Build Output
+client/dist/
+
+# Log Files
+*.log
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# VS Code Settings
+.vscode/
