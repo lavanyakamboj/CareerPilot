@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
+const path = require("path");
 
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -97,19 +98,20 @@ router.delete("/:id", protect, async (req, res) => {
       });
     }
 
-    // Check if this resume belongs to the logged-in user
     if (resume.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message: "Not allowed to delete this resume",
       });
     }
 
+    // Create correct file path from server folder
+    const filePath = path.join(__dirname, "..", resume.filePath);
+
     // Delete file from uploads folder if it exists
-    if (fs.existsSync(resume.filePath)) {
-      fs.unlinkSync(resume.filePath);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
 
-    // Delete resume record from MongoDB
     await resume.deleteOne();
 
     res.status(200).json({
