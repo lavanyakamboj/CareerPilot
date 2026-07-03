@@ -58,6 +58,41 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
+
+// Download or view resume file
+router.get("/:id/download", protect, async (req, res) => {
+  try {
+    const resume = await Resume.findById(req.params.id);
+
+    if (!resume) {
+      return res.status(404).json({
+        message: "Resume not found",
+      });
+    }
+
+    if (resume.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Not allowed to access this resume",
+      });
+    }
+
+    const filePath = path.join(__dirname, "..", resume.filePath);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        message: "Resume file not found",
+      });
+    }
+
+    res.download(filePath, resume.originalName);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to download resume",
+      error: error.message,
+    });
+  }
+});
+
 // Get single resume details by resume ID
 router.get("/:id", protect, async (req, res) => {
   try {
