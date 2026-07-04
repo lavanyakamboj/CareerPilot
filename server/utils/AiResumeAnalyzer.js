@@ -38,13 +38,27 @@ const buildPrompt = (resumeText) => {
     `;
 };
 
+// if ai doesnot return json 
 const parseResponse = (text) => {
-	try {
-		return JSON.parse(text);
-	} catch (error) {
-		console.error("Invalid AI JSON:", text);
-		throw new Error("Invalid JSON returned by AI");
-	}
+  try {
+    // Remove markdown code fences if present
+    text = text.replace(/```json|```/gi, "").trim();
+
+    // Extract only JSON object
+    const start = text.indexOf("{");  // where we found '{' -- json starts from here  
+    const end = text.lastIndexOf("}");
+
+    if (start === -1 || end === -1) {
+      throw new Error("JSON object not found");
+    }
+
+    const jsonText = text.slice(start, end + 1);
+
+    return JSON.parse(jsonText);   // return object 
+  } catch (error) {
+    console.error("Invalid AI Response:", text);
+    throw new Error("Invalid JSON returned by AI");
+  }
 };
 
 const analyzeResumeByAi = async (resumeText) => {
