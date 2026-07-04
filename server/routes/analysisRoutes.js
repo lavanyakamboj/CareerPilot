@@ -10,6 +10,7 @@ const {
 	compareResumeVersions,
 	getSingleAnalysis,
 	deleteAnalysis,
+    matchResumeWithJd,
 } = require("../controllers/analysisController");
 
 router.post("/resume/:id", protect, analyzeResume);
@@ -20,5 +21,6 @@ router.get("/compare", protect, compareResumeVersions);
 router.get("/", protect, getAllAnalyses);
 router.get("/:id", protect, getSingleAnalysis);
 router.delete("/:id", protect, deleteAnalysis);
+router.post("/jd-match/:resumeId", protect, matchResumeWithJd);
 
 module.exports = router;

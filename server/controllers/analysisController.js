@@ -1,6 +1,6 @@
 const Resume = require("../models/resumeModel");
 const Analysis = require("../models/analysisModel");
-const analyzeResumeByAi = require("../utils/AiResumeAnalyzer");
+const { analyzeResumeByAi, analyzeResumeForJd } = require("../utils/AiResumeAnalyzer");
 
 // POST /api/analysis/resume/:id
 const analyzeResume = async (req, res) => {
@@ -220,6 +220,52 @@ const deleteAnalysis = async (req, res) => {
 	}
 };
 
+const matchResumeWithJd = async (req, res) => {
+  try {
+    const { resumeId } = req.params;
+    const { jobDescription } = req.body;
+
+    if (!jobDescription || jobDescription.trim() === "") {
+      return res.status(400).json({
+        message: "Job description is required",
+      });
+    }
+
+    const resume = await Resume.findOne({
+      _id: resumeId,
+      user: req.user._id,
+    });
+
+    if (!resume) {
+      return res.status(404).json({
+        message: "Resume not found",
+      });
+    }
+
+    if (!resume.extractedText || resume.extractedText.trim() === "") {
+      return res.status(400).json({
+        message: "Resume text not found. Please extract resume text first.",
+      });
+    }
+
+    const result = await analyzeResumeForJd(
+      resume.extractedText,
+      jobDescription
+    );
+
+    res.status(200).json({
+      message: "JD match analysis completed successfully",
+      provider: result.provider,
+      result: result.analysis,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "JD match analysis failed",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
 	analyzeResume,
 	getAllAnalyses,
@@ -227,4 +273,5 @@ module.exports = {
 	compareResumeVersions,
 	getSingleAnalysis,
 	deleteAnalysis,
+  matchResumeWithJd,
 };
