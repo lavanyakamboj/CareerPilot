@@ -74,12 +74,97 @@ const getAllAnalyses = async (req, res) => {
 	}
 };
 
+// GET /api/analysis/tracker/score
+const getScoreTracker = async (req, res) => {
+	try {
+		const analyses = await Analysis.find({ user: req.user._id })
+			.select("score createdAt")
+			.sort({ createdAt: 1 });
+
+		if (!analyses || analyses.length === 0) {
+			return res.status(404).json({
+				message: "No analysis history found",
+			});
+		}
+
+		const oldScore = analyses[0].score;
+		const latestScore = analyses[analyses.length - 1].score;
+		const improvement = latestScore - oldScore;
+
+		let trend = "No Change";
+
+		if (improvement > 0) {
+			trend = "Improving";
+		} else if (improvement < 0) {
+			trend = "Declining";
+		}
+
+		res.status(200).json({
+			oldScore,
+			latestScore,
+			improvement,
+			trend,
+			totalAnalyses: analyses.length,
+		});
+	} catch (error) {
+		res.status(500).json({
+			message: "Failed to fetch score tracker",
+			error: error.message,
+		});
+	}
+};
+
+// GET /api/analysis/compare
+const compareResumeVersions = async (req, res) => {
+	try {
+		const analyses = await Analysis.find({ user: req.user._id })
+			.select("score summary createdAt")
+			.sort({ createdAt: -1 })
+			.limit(2);
+
+		if (analyses.length < 2) {
+			return res.status(400).json({
+				message: "At least two analyses are required for comparison.",
+			});
+		}
+
+		const latestAnalysis = analyses[0];
+		const previousAnalysis = analyses[1];
+
+		const difference = latestAnalysis.score - previousAnalysis.score;
+
+		let trend = "No Change";
+
+		if (difference > 0) {
+			trend = "Improving";
+		} else if (difference < 0) {
+			trend = "Declining";
+		}
+
+		res.status(200).json({
+			previousScore: previousAnalysis.score,
+			latestScore: latestAnalysis.score,
+			difference,
+			trend,
+			previousSummary: previousAnalysis.summary,
+			latestSummary: latestAnalysis.summary,
+			previousAnalysisDate: previousAnalysis.createdAt,
+			latestAnalysisDate: latestAnalysis.createdAt,
+		});
+	} catch (error) {
+		res.status(500).json({
+			message: "Failed to compare resume versions",
+			error: error.message,
+		});
+	}
+};
+
 // GET /api/analysis/:id
 const getSingleAnalysis = async (req, res) => {
 	try {
 		const analysis = await Analysis.findById(req.params.id).populate(
 			"resume",
-			"originalName filename fileSize fileType createdAt",
+			"originalName filename fileSize fileType createdAt"
 		);
 
 		if (!analysis) {
@@ -138,6 +223,8 @@ const deleteAnalysis = async (req, res) => {
 module.exports = {
 	analyzeResume,
 	getAllAnalyses,
+	getScoreTracker,
+	compareResumeVersions,
 	getSingleAnalysis,
 	deleteAnalysis,
 };

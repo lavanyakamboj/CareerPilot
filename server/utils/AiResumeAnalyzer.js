@@ -15,9 +15,16 @@ Rules:
 - Score 90+ only if resume has strong projects, GitHub/LinkedIn links, deployed links, measurable impact, clean formatting, and domain-specific skills.
 - Deduct marks for weak project descriptions, missing links, no deployment, no metrics, repeated info, grammar issues, and missing skills expected for the detected domain.
 - Weaknesses must be specific, not generic.
-- Keep summary under 60 words.
 - Maximum 4 short points in every array.
 - Return ONLY valid JSON. No markdown. No explanation.
+
+Summary Rules:
+- Write 2-3 professional sentences.
+- Give an overall evaluation of the resume.
+- Mention key strengths.
+- Mention one or two improvement areas.
+- Do NOT simply repeat the candidate's job title or headline.
+- Keep it under 80 words.
 
 For MERN/full-stack candidates, relevant missing skills may include Git, GitHub, JWT Auth, REST API design, Redux, testing, deployment, Docker, CI/CD, WebSockets, or API documentation.
 
