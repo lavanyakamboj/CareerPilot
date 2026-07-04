@@ -1,11 +1,14 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+
 const resumeRoutes = require("./routes/resumeRoutes");
 const authRoutes = require("./routes/authRoutes");
+const analysisRoutes = require("./routes/analysisRoutes");
 
-dotenv.config();
 connectDB();
 
 const app = express();
@@ -15,6 +18,7 @@ app.use(express.json());
 
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/analysis", analysisRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is running 🚀");
