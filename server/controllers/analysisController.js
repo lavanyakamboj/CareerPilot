@@ -1,6 +1,11 @@
 const Resume = require("../models/resumeModel");
 const Analysis = require("../models/analysisModel");
-const { analyzeResumeByAi, analyzeResumeForJd } = require("../utils/AiResumeAnalyzer");
+
+const {
+  analyzeResumeByAi,
+  analyzeResumeForJd,
+  interviewAI,
+} = require("../utils/AiResumeAnalyzer");
 
 // POST /api/analysis/resume/:id
 const analyzeResume = async (req, res) => {
@@ -265,13 +270,50 @@ const matchResumeWithJd = async (req, res) => {
     });
   }
 };
+const interview = async (req, res) => {
+  try {
+    const { resumeId } = req.params;
+    const { jobDescription = "" } = req.body;
+
+    const resume = await Resume.findOne({
+      _id: resumeId,
+      user: req.user._id,
+    });
+
+    if (!resume) {
+      return res.status(404).json({
+        message: "Resume not found",
+      });
+    }
+
+    if (!resume.extractedText || resume.extractedText.trim() === "") {
+      return res.status(400).json({
+        message: "Resume text not found. Please extract resume text first.",
+      });
+    }
+
+    const result = await interviewAI(resume.extractedText, jobDescription);
+
+    res.status(200).json({
+      message: "Interview questions generated successfully",
+      provider: result.provider,
+      result: result.analysis,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Interview question generation failed",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
-	analyzeResume,
-	getAllAnalyses,
-	getScoreTracker,
-	compareResumeVersions,
-	getSingleAnalysis,
-	deleteAnalysis,
+  analyzeResume,
+  getAllAnalyses,
+  getScoreTracker,
+  compareResumeVersions,
+  getSingleAnalysis,
+  deleteAnalysis,
   matchResumeWithJd,
+  interview,
 };

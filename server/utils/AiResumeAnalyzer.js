@@ -38,7 +38,6 @@ Return exactly:
 `;
 };
 
-//resume aur Job description compare karne ke liye prompt
 const buildJdMatchPrompt = (resumeText, jobDescription) => {
   const limitedResumeText = resumeText.slice(0, 10000);
   const limitedJdText = jobDescription.slice(0, 6000);
@@ -75,6 +74,72 @@ Return exactly:
 `;
 };
 
+const buildInterviewPrompt = (resumeText, jobDescription = "") => {
+  const limitedResumeText = resumeText.slice(0, 10000);
+  const limitedJdText = jobDescription.slice(0, 6000);
+
+  return `
+You are an experienced Technical Interviewer, Hiring Manager, and Career Coach.
+
+Generate realistic interview questions based on the candidate's resume.
+If a job description is provided, prioritize its required skills and responsibilities while still considering the resume.
+
+Rules:
+- Return ONLY valid raw JSON.
+- No markdown or explanation.
+- Do not invent projects or experience.
+- Use only technologies mentioned in the resume or required in the job description.
+- Questions must be practical and commonly asked in placement interviews.
+- Avoid duplicate or generic questions.
+- Maximum 5 items in every array.
+- Keep every question short and clear.
+- Tips must be personalized using the candidate's resume and missing JD skills.
+
+Question Guidelines:
+- Technical Questions → Core concepts of technologies used in resume/JD.
+- Project Questions → Based only on candidate's projects.
+- HR Questions → Resume and career focused.
+- Coding Questions → Placement-level DSA or coding questions relevant to the target role (Easy to Medium). Prefer concepts like Arrays, Strings, Hashing, Linked Lists, Stacks, Queues, Trees, Recursion, Sliding Window, Binary Search, and JavaScript/Node.js coding when relevant.
+- If JD contains technologies not present in the resume, include interview questions about them.
+
+Resume:
+${limitedResumeText}
+
+Job Description:
+${limitedJdText || "Not provided"}
+
+Return exactly:
+
+{
+  "technicalQuestions": [
+    {
+      "question": "",
+      "difficulty": "Easy"
+    }
+  ],
+  "projectQuestions": [
+    {
+      "question": "",
+      "difficulty": "Medium"
+    }
+  ],
+  "hrQuestions": [
+    {
+      "question": "",
+      "difficulty": "Easy"
+    }
+  ],
+  "codingQuestions": [
+    {
+      "question": "",
+      "difficulty": "Medium"
+    }
+  ],
+  "tips": []
+}
+`;
+};
+
 const parseResponse = (text) => {
   try {
     text = text.replace(/```json|```/gi, "").trim();
@@ -95,7 +160,6 @@ const parseResponse = (text) => {
   }
 };
 
-//fallback logic
 const runAiProviders = async (prompt) => {
   const providers = [
     {
@@ -128,7 +192,6 @@ const runAiProviders = async (prompt) => {
   throw new Error("All AI providers failed.");
 };
 
-// new function to match job Description
 const analyzeResumeByAi = async (resumeText) => {
   const prompt = buildPrompt(resumeText);
   return await runAiProviders(prompt);
@@ -139,5 +202,13 @@ const analyzeResumeForJd = async (resumeText, jobDescription) => {
   return await runAiProviders(prompt);
 };
 
-module.exports = analyzeResumeByAi;
-module.exports.analyzeResumeForJd = analyzeResumeForJd;
+const interviewAI = async (resumeText, jobDescription = "") => {
+  const prompt = buildInterviewPrompt(resumeText, jobDescription);
+  return await runAiProviders(prompt);
+};
+
+module.exports = {
+  analyzeResumeByAi,
+  analyzeResumeForJd,
+  interviewAI,
+};
