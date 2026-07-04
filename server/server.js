@@ -8,6 +8,7 @@ const connectDB = require("./config/db");
 const resumeRoutes = require("./routes/resumeRoutes");
 const authRoutes = require("./routes/authRoutes");
 const analysisRoutes = require("./routes/analysisRoutes");
+const roadmapRoutes = require("./routes/roadmapRoutes");
 
 connectDB();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/analysis", analysisRoutes);
+app.use("/api/roadmap", roadmapRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is running 🚀");
