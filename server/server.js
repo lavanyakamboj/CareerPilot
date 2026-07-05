@@ -10,6 +10,7 @@ const authRoutes = require("./routes/authRoutes");
 const analysisRoutes = require("./routes/analysisRoutes");
 const roadmapRoutes = require("./routes/roadmapRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
+const jobRoutes = require("./routes/jobRoutes");
 
 connectDB();
 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/analysis", analysisRoutes);
 app.use("/api/roadmap", roadmapRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/ai/jobs", jobRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is running 🚀");

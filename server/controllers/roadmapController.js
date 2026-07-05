@@ -1,6 +1,6 @@
 const Resume = require("../models/resumeModel");
 const Roadmap = require("../models/roadmapModel");
-const { generateRoadmap } = require("../utils/roadmapService");
+const { generateRoadmap } = require("../utils/roadmapUtils");
 
 const generateCareerRoadmap = async (req, res) => {
 	try {
