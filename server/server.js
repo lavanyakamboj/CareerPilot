@@ -12,6 +12,7 @@ const roadmapRoutes = require("./routes/roadmapRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const coverLetterRoutes = require("./routes/coverLetterRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 connectDB();
 
@@ -27,6 +28,7 @@ app.use("/api/roadmap", roadmapRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/ai/jobs", jobRoutes);
 app.use("/api/cover-letters", coverLetterRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is running ........");

@@ -1,5 +1,6 @@
 const Resume = require("../models/resumeModel");
 const Analysis = require("../models/analysisModel");
+const Interview = require("../models/interviewModel");
 
 const {
   analyzeResumeByAi,
@@ -270,6 +271,8 @@ const matchResumeWithJd = async (req, res) => {
     });
   }
 };
+
+
 const interview = async (req, res) => {
   try {
     const { resumeId } = req.params;
@@ -292,12 +295,46 @@ const interview = async (req, res) => {
       });
     }
 
+    const latestAnalysis = await Analysis.findOne({
+      user: req.user._id,
+      resume: resume._id,
+    })
+      .sort({ createdAt: -1 })
+      .select("_id");
+
+    if (!latestAnalysis) {
+      return res.status(400).json({
+        message:
+          "Please analyze this resume first before generating interview questions.",
+      });
+    }
+
     const result = await interviewAI(resume.extractedText, jobDescription);
+
+    const interviewQuestions = await Interview.findOneAndUpdate(
+      {
+        user: req.user._id,
+        resume: resume._id,
+      },
+      {
+        user: req.user._id,
+        resume: resume._id,
+        analysis: latestAnalysis._id,
+        provider: result.provider,
+        technicalQuestions: result.analysis.technicalQuestions || [],
+        projectQuestions: result.analysis.projectQuestions || [],
+        behavioralQuestions: result.analysis.behavioralQuestions || [],
+      },
+      {
+        upsert: true,
+        returnDocument: "after",
+      }
+    );
 
     res.status(200).json({
       message: "Interview questions generated successfully",
       provider: result.provider,
-      result: result.analysis,
+      interviewQuestions,
     });
   } catch (error) {
     res.status(500).json({
@@ -306,6 +343,7 @@ const interview = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   analyzeResume,
