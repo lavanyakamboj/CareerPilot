@@ -1,0 +1,51 @@
+:root {
+  --font-heading: "Instrument Serif", serif;
+  --font-body: "Work Sans", sans-serif;
+
+  --color-background: #fbfaff;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f6f3fc;
+
+  --color-text: #171321;
+  --color-text-secondary: #625b6a;
+  --color-text-muted: #857c8e;
+
+  --color-primary: #7857e6;
+  --color-primary-dark: #5d3dc4;
+  --color-primary-soft: #eee8ff;
+
+  --color-blue-soft: #edf6ff;
+  --color-peach-soft: #fff4ea;
+  --color-mint-soft: #effbf6;
+  --color-pink-soft: #fff0f5;
+
+  --color-border: rgba(37, 28, 52, 0.1);
+  --color-border-light: rgba(37, 28, 52, 0.07);
+
+  --shadow-small: 0 8px 22px rgba(35, 26, 50, 0.05);
+  --shadow-medium: 0 18px 45px rgba(46, 35, 64, 0.08);
+  --shadow-large: 0 35px 80px rgba(39, 24, 64, 0.16);
+
+  --radius-small: 12px;
+  --radius-medium: 16px;
+  --radius-large: 24px;
+  --radius-extra-large: 32px;
+
+  --container-width: 1180px;
+  --section-spacing: 90px;
+
+  --transition-fast: 160ms ease;
+  --transition-normal: 220ms ease;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-spacing: 82px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --section-spacing: 68px;
+  }
+}

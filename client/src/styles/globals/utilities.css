@@ -1,0 +1,140 @@
+.container {
+  width: min(calc(100% - 40px), var(--container-width));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--section-spacing);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-height: 46px;
+  padding: 0 20px;
+
+  border: 1px solid transparent;
+  border-radius: 14px;
+
+  font-size: 0.92rem;
+  font-weight: 600;
+
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button svg {
+  font-size: 1.05rem;
+}
+
+.button-large {
+  min-height: 54px;
+  padding-inline: 25px;
+  border-radius: 16px;
+}
+
+.button-primary {
+  color: #ffffff;
+  background: linear-gradient(135deg, #8061ea, #6543d1);
+  box-shadow: 0 13px 30px rgba(101, 67, 209, 0.22);
+}
+
+.button-primary:hover {
+  box-shadow: 0 17px 35px rgba(101, 67, 209, 0.3);
+}
+
+.button-secondary {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(38, 29, 51, 0.12);
+  box-shadow: var(--shadow-small);
+  backdrop-filter: blur(12px);
+}
+
+.button-secondary:hover {
+  background: #ffffff;
+  border-color: rgba(120, 87, 230, 0.24);
+}
+
+.button-dark {
+  color: #ffffff;
+  background: #1c1727;
+  box-shadow: 0 14px 30px rgba(28, 23, 39, 0.18);
+}
+
+.button-white {
+  color: #2d1b54;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(29, 16, 55, 0.2);
+}
+
+.section-heading-centered {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 16px;
+
+  color: var(--color-primary);
+
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.section-heading h2,
+.final-cta-content h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 5vw, 4.3rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.section-heading h2 span,
+.final-cta-content h2 span {
+  color: var(--color-primary);
+  font-style: italic;
+}
+
+.section-heading > p {
+  margin-top: 22px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 768px) {
+  .container {
+    width: min(calc(100% - 28px), var(--container-width));
+  }
+
+  .section-heading h2,
+  .final-cta-content h2 {
+    line-height: 1.04;
+  }
+}
+
+@media (max-width: 480px) {
+  .button-large {
+    min-height: 50px;
+    padding-inline: 18px;
+  }
+}

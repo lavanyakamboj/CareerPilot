@@ -1,0 +1,415 @@
+.navbar-wrapper {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+
+	width: 100%;
+	padding-block: 18px;
+
+	transition:
+		padding var(--transition-normal),
+		background-color var(--transition-normal),
+		border-color var(--transition-normal),
+		box-shadow var(--transition-normal);
+}
+
+.navbar-scrolled {
+	padding-block: 10px;
+
+	background: rgba(251, 250, 255, 0.84);
+	border-bottom: 1px solid rgba(42, 33, 56, 0.08);
+	box-shadow: 0 8px 30px rgba(46, 35, 64, 0.05);
+
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+}
+
+.navbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	min-height: 52px;
+}
+
+/* ================================
+   BRAND
+================================ */
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 11px;
+
+	flex-shrink: 0;
+
+	color: inherit;
+	text-decoration: none;
+}
+
+/*
+  The logo image currently has a white background.
+  The icon container keeps it visually clean until
+  a transparent PNG version is available.
+*/
+.brand-icon {
+	display: grid;
+	place-items: center;
+
+	width: 44px;
+	height: 44px;
+
+	flex-shrink: 0;
+	overflow: hidden;
+
+	background: linear-gradient(
+		145deg,
+		rgba(146, 118, 239, 0.13),
+		rgba(104, 67, 211, 0.06)
+	);
+
+	border: 1px solid rgba(112, 78, 224, 0.12);
+	border-radius: 14px;
+
+	box-shadow:
+		0 9px 22px rgba(104, 67, 211, 0.13),
+		inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.logo-image {
+	display: block;
+
+	width: 39px;
+	height: 42px;
+	max-width: none;
+
+	object-fit: cover;
+	object-position: center;
+
+	transform: scale(1.32);
+
+	mix-blend-mode: multiply;
+
+	user-select: none;
+	pointer-events: none;
+}
+
+.brand-name {
+	display: inline-flex;
+	align-items: baseline;
+
+	color: #211a2d;
+
+	font-size: 1.08rem;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.035em;
+
+	white-space: nowrap;
+}
+
+.brand-name > span {
+	margin-left: 5px;
+
+	color: var(--color-primary);
+
+	font-weight: 700;
+}
+
+/* ================================
+   DESKTOP NAVIGATION
+================================ */
+
+.navbar-links {
+	display: flex;
+	align-items: center;
+	gap: 32px;
+}
+
+.navbar-links a,
+.navbar-login {
+	position: relative;
+
+	color: #5f5868;
+
+	font-size: 0.88rem;
+	font-weight: 500;
+	line-height: 1;
+
+	transition:
+		color var(--transition-fast),
+		transform var(--transition-fast);
+}
+
+.navbar-links a::after {
+	content: "";
+
+	position: absolute;
+	left: 0;
+	bottom: -8px;
+
+	width: 100%;
+	height: 1.5px;
+
+	background: var(--color-primary);
+	border-radius: 999px;
+
+	transform: scaleX(0);
+	transform-origin: right;
+
+	transition: transform var(--transition-fast);
+}
+
+.navbar-links a:hover,
+.navbar-login:hover {
+	color: var(--color-primary);
+}
+
+.navbar-links a:hover::after {
+	transform: scaleX(1);
+	transform-origin: left;
+}
+
+.navbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+}
+
+.navbar-login {
+	display: inline-flex;
+	align-items: center;
+	min-height: 42px;
+}
+
+.navbar-cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+
+	min-height: 43px;
+	padding-inline: 18px;
+
+	border-radius: 13px;
+}
+
+/* ================================
+   MOBILE MENU BUTTON
+================================ */
+
+.mobile-menu-button {
+	display: none;
+	align-items: center;
+	justify-content: center;
+
+	width: 43px;
+	height: 43px;
+	padding: 0;
+
+	color: #1c1727;
+	background: rgba(255, 255, 255, 0.9);
+
+	border: 1px solid rgba(42, 33, 56, 0.11);
+	border-radius: 13px;
+
+	box-shadow: var(--shadow-small);
+
+	cursor: pointer;
+
+	transition:
+		color var(--transition-fast),
+		background-color var(--transition-fast),
+		border-color var(--transition-fast),
+		transform var(--transition-fast);
+}
+
+.mobile-menu-button:hover {
+	color: var(--color-primary);
+
+	background: #ffffff;
+	border-color: rgba(112, 78, 224, 0.2);
+
+	transform: translateY(-1px);
+}
+
+.mobile-menu-button svg {
+	font-size: 1.4rem;
+}
+
+/* ================================
+   MOBILE MENU
+================================ */
+
+.mobile-menu {
+	display: none;
+}
+
+@media (max-width: 1100px) {
+	.navbar-links {
+		gap: 22px;
+	}
+}
+
+@media (max-width: 900px) {
+	.navbar-wrapper {
+		padding-block: 14px;
+	}
+
+	.navbar-scrolled {
+		padding-block: 9px;
+	}
+
+	.navbar-links,
+	.navbar-actions {
+		display: none;
+	}
+
+	.mobile-menu-button {
+		display: flex;
+	}
+
+	.mobile-menu {
+		display: block;
+
+		max-height: 0;
+		overflow: hidden;
+
+		opacity: 0;
+
+		background: rgba(251, 250, 255, 0.96);
+		border-bottom: 1px solid transparent;
+
+		transition:
+			max-height 260ms ease,
+			opacity 200ms ease,
+			border-color 200ms ease;
+
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
+	}
+
+	.mobile-menu-open {
+		max-height: 460px;
+
+		opacity: 1;
+		border-color: rgba(42, 33, 56, 0.08);
+	}
+
+	.mobile-menu-content {
+		display: flex;
+		flex-direction: column;
+
+		padding-top: 13px;
+		padding-bottom: 22px;
+	}
+
+	.mobile-menu-content > a {
+		display: flex;
+		align-items: center;
+
+		min-height: 48px;
+		padding: 13px 2px;
+
+		color: #5e5667;
+
+		border-bottom: 1px solid rgba(42, 33, 56, 0.07);
+
+		font-size: 0.88rem;
+		font-weight: 500;
+
+		transition:
+			color var(--transition-fast),
+			padding-left var(--transition-fast);
+	}
+
+	.mobile-menu-content > a:hover {
+		padding-left: 5px;
+
+		color: var(--color-primary);
+	}
+
+	.mobile-menu-actions {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+
+		margin-top: 18px;
+	}
+
+	.mobile-menu-actions a {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+
+		min-height: 44px;
+	}
+}
+
+@media (max-width: 560px) {
+	.navbar-wrapper {
+		padding-block: 12px;
+	}
+
+	.navbar {
+		min-height: 48px;
+	}
+
+	.brand {
+		gap: 9px;
+	}
+
+	.brand-icon {
+		width: 40px;
+		height: 40px;
+
+		border-radius: 12px;
+	}
+
+	.logo-image {
+		width: 53px;
+		height: 53px;
+
+		transform: scale(1.32);
+	}
+
+	.brand-name {
+		font-size: 1rem;
+	}
+
+	.mobile-menu-button {
+		width: 40px;
+		height: 40px;
+
+		border-radius: 12px;
+	}
+
+	.mobile-menu-button svg {
+		font-size: 1.3rem;
+	}
+}
+
+@media (max-width: 430px) {
+	.brand-name {
+		font-size: 0.94rem;
+		letter-spacing: -0.03em;
+	}
+
+	.brand-name > span {
+		margin-left: 4px;
+	}
+
+	.brand-icon {
+		width: 38px;
+		height: 38px;
+	}
+
+	.logo-image {
+		width: 50px;
+		height: 50px;
+	}
+
+	.mobile-menu-actions {
+		grid-template-columns: 1fr;
+	}
+}
