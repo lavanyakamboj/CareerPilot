@@ -1,0 +1,26 @@
+/* Login only */
+
+.login-forgot-link {
+  color: var(--color-primary);
+
+  font-size: 0.73rem;
+  font-weight: 600;
+
+  transition: color var(--transition-fast);
+}
+
+.login-forgot-link:hover {
+  color: var(--color-primary-dark);
+}
+
+.login-forgot-link:focus-visible {
+  outline: 3px solid rgba(120, 87, 230, 0.2);
+  outline-offset: 3px;
+}
+
+.login-remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}

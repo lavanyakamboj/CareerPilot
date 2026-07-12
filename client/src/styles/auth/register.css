@@ -1,0 +1,55 @@
+/* Register only */
+
+.register-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.register-password-hint {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.register-terms-option {
+  align-items: flex-start;
+  width: 100%;
+}
+
+.register-terms-option a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.register-terms-option a:hover {
+  color: var(--color-primary-dark);
+}
+
+/* Password strength */
+
+.register-password-strength {
+  display: grid;
+  gap: 7px;
+}
+
+.register-strength-bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.register-strength-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-border-light);
+}
+
+.register-strength-bar.active {
+  background: var(--color-primary);
+}
+
+.register-strength-text {
+  color: var(--color-text-muted);
+  font-size: 0.67rem;
+}

@@ -1,0 +1,137 @@
+/* Auth page */
+
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 24px;
+  overflow: hidden;
+  isolation: isolate;
+
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(120, 87, 230, 0.13),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 90%,
+      rgba(173, 216, 255, 0.24),
+      transparent 32%
+    ),
+    var(--color-background);
+}
+
+/* Background grid */
+
+.auth-background-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+
+  background-image:
+    linear-gradient(
+      rgba(120, 87, 230, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(120, 87, 230, 0.035) 1px,
+      transparent 1px
+    );
+
+  background-size: 52px 52px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.75),
+    transparent 88%
+  );
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.75),
+    transparent 88%
+  );
+}
+
+/* Background shapes */
+
+.auth-background-shape {
+  position: absolute;
+  z-index: -2;
+  border-radius: 50%;
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.auth-shape-one {
+  top: -190px;
+  left: -120px;
+  width: 430px;
+  height: 430px;
+  background: rgba(120, 87, 230, 0.12);
+}
+
+.auth-shape-two {
+  right: -170px;
+  bottom: -190px;
+  width: 470px;
+  height: 470px;
+  background: rgba(186, 220, 255, 0.27);
+}
+
+/* Main container */
+
+.auth-shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(440px, 0.94fr);
+
+  width: min(100%, 1380px);
+  min-height: calc(100vh - 48px);
+  margin: 0 auto;
+
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-extra-large);
+
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: var(--shadow-large);
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  overflow: hidden;
+}
+
+/* Form section */
+
+.auth-form-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  padding: 56px 64px;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(120, 87, 230, 0.08),
+      transparent 28%
+    ),
+    rgba(255, 255, 255, 0.88);
+}
+
+.auth-form-container {
+  width: min(100%, 450px);
+}
+
+.auth-form-container-wide {
+  width: min(100%, 500px);
+}
+
+.auth-mobile-header {
+  display: none;
+}
