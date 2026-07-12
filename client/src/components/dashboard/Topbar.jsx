@@ -1,3 +1,5 @@
+import React from "react";
+
 import {
   FiBell,
   FiChevronDown,
@@ -5,69 +7,72 @@ import {
   FiSearch,
 } from "react-icons/fi";
 
-function Topbar({
-  userName = "Student",
-  onOpenSidebar,
-}) {
+import "../../styles/dashboard/topbar.css";
+
+const Topbar = ({ openSidebar }) => {
+  const currentDate = new Intl.DateTimeFormat("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date());
+
   return (
-    <header className="sticky top-0 z-30 flex min-h-[78px] items-center justify-between border-b border-career-border/80 bg-career-background/85 px-5 backdrop-blur-glass sm:px-8 lg:px-10">
-      <div className="flex items-center gap-3">
+    <header className="dashboard-topbar">
+      <div className="topbar-left">
         <button
           type="button"
+          className="topbar-menu-btn"
+          onClick={openSidebar}
           aria-label="Open sidebar"
-          onClick={onOpenSidebar}
-          className="career-icon-button lg:hidden"
         >
-          <FiMenu className="text-xl" />
+          <FiMenu />
         </button>
 
-        <div>
-          <span className="career-eyebrow">
-            Career workspace
-          </span>
+        <div className="topbar-heading">
+          <p className="topbar-date">{currentDate}</p>
 
-          <h1 className="mt-1 font-heading text-2xl font-normal text-career-text">
-            Overview
-          </h1>
+          <h1>Dashboard</h1>
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5">
-        <button
-          type="button"
-          aria-label="Search"
-          className="career-icon-button hidden sm:grid"
-        >
-          <FiSearch />
-        </button>
+      <div className="topbar-actions">
+        <label className="topbar-search">
+          <FiSearch className="topbar-search-icon" />
+
+          <input
+            type="search"
+            placeholder="Search tools..."
+            aria-label="Search dashboard tools"
+          />
+        </label>
 
         <button
           type="button"
-          aria-label="Notifications"
-          className="career-icon-button relative"
+          className="topbar-icon-btn"
+          aria-label="View notifications"
         >
           <FiBell />
 
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full border border-white bg-career-purple" />
+          <span className="topbar-notification-dot" />
         </button>
 
         <button
           type="button"
-          className="flex items-center gap-2 rounded-button border border-career-border bg-white/75 p-1 pr-3"
+          className="topbar-profile"
+          aria-label="Open user profile"
         >
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-[#A48AF3] to-[#6042BF] text-sm font-semibold text-white">
-            {userName.charAt(0).toUpperCase()}
+          <span className="topbar-avatar">LK</span>
+
+          <span className="topbar-user-info">
+            <strong>Lavanya Kamboj</strong>
+            <small>Student</small>
           </span>
 
-          <span className="hidden max-w-28 truncate text-sm font-medium text-career-text sm:block">
-            {userName.split(" ")[0]}
-          </span>
-
-          <FiChevronDown className="hidden text-sm text-career-muted sm:block" />
+          <FiChevronDown className="topbar-profile-arrow" />
         </button>
       </div>
     </header>
   );
-}
+};
 
 export default Topbar;
