@@ -10,12 +10,16 @@ import DashboardHome from "../pages/Dashboard";
 const AppRoutes = () => {
   return (
     <Routes>
+       {/* Public Pages */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* Dashboard */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardHome />} />
       </Route>
+      {/* Invalid URL */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

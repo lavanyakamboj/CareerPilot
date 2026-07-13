@@ -1,20 +1,32 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import {
-  FiArrowLeft,
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import toast from "react-hot-toast";
+
+import {
   FiArrowRight,
-  FiBarChart2,
   FiCheckCircle,
-  FiEye,
-  FiEyeOff,
   FiLock,
   FiMail,
-  FiTarget,
-  FiTrendingUp,
 } from "react-icons/fi";
+
 import { FcGoogle } from "react-icons/fc";
 
-import logo from "../assets/images/logo.png";
+import api from "../api/api";
+
+import AuthLayout from "../components/auth/AuthLayout";
+import AuthInput from "../components/auth/AuthInput";
+
+import useAuthForm from "../hooks/useAuthForm";
+
+import {
+  loginInitialValues,
+  loginShowcaseData,
+} from "../data/authData";
 
 import "../styles/auth/common/auth-layout.css";
 import "../styles/auth/common/auth-showcase.css";
@@ -22,344 +34,281 @@ import "../styles/auth/common/auth-form.css";
 import "../styles/auth/login.css";
 import "../styles/auth/common/auth-responsive.css";
 
-const loginBenefits = [
-  {
-    icon: FiTarget,
-    title: "Personalized career guidance",
-    description:
-      "Get recommendations based on your resume, skills and career goals.",
-  },
-  {
-    icon: FiBarChart2,
-    title: "Track your improvement",
-    description:
-      "Monitor resume scores, skill gaps and overall career progress.",
-  },
-  {
-    icon: FiTrendingUp,
-    title: "Move forward with clarity",
-    description:
-      "Know exactly what to improve and which opportunity to target next.",
-  },
-];
-
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const registeredEmail =
+    location.state?.registeredEmail || "";
+
+  const {
+    formData,
+    errors,
+    setErrors,
+    isSubmitting,
+    setIsSubmitting,
+    handleChange,
+  } = useAuthForm({
+    ...loginInitialValues,
+    email: registeredEmail,
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
-
-    setFormData((previousData) => ({
-      ...previousData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-
-    setErrors((previousErrors) => ({
-      ...previousErrors,
-      [name]: "",
-    }));
-  };
+  const [showPassword, setShowPassword] =
+    useState(false);
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email address is required.";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address.";
+      newErrors.email =
+        "Email address is required.";
+    } else if (
+      !/\S+@\S+\.\S+/.test(formData.email)
+    ) {
+      newErrors.email =
+        "Please enter a valid email address.";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required.";
+      newErrors.password =
+        "Password is required.";
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must contain at least 6 characters.";
+      newErrors.password =
+        "Password must contain at least 6 characters.";
     }
 
     return newErrors;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const validationErrors = validateForm();
 
-    if (Object.keys(validationErrors).length > 0) {
+    if (
+      Object.keys(validationErrors).length > 0
+    ) {
       setErrors(validationErrors);
       return;
     }
 
-    console.log("Login form data:", formData);
+    try {
+      setIsSubmitting(true);
+      setErrors({});
 
-    // Backend login API will be connected later.
+      const response = await api.post(
+        "/auth/login",
+        {
+          email: formData.email
+            .trim()
+            .toLowerCase(),
+          password: formData.password,
+        },
+      );
+
+      const token =
+        response.data?.token ||
+        response.data?.data?.token;
+
+      const user =
+        response.data?.user ||
+        response.data?.data?.user;
+
+      if (!token) {
+        throw new Error(
+          "Authentication token was not received.",
+        );
+      }
+
+      localStorage.setItem(
+        "careerPilotToken",
+        token,
+      );
+
+      if (user) {
+        localStorage.setItem(
+          "careerPilotUser",
+          JSON.stringify(user),
+        );
+      }
+
+      if (formData.rememberMe) {
+        localStorage.setItem(
+          "careerPilotRememberMe",
+          "true",
+        );
+      } else {
+        localStorage.removeItem(
+          "careerPilotRememberMe",
+        );
+      }
+
+      toast.success(
+        "Welcome back to CareerPilot!",
+      );
+
+      navigate("/dashboard", {
+        replace: true,
+      });
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Unable to sign in. Please try again.";
+
+      setErrors((previousErrors) => ({
+        ...previousErrors,
+        submit: message,
+      }));
+
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleLogin = () => {
-    console.log("Google login clicked");
-
-    // Google authentication will be connected later.
+    toast(
+      "Google login will be available soon.",
+    );
   };
 
   return (
-    <main className="auth-page">
-      <div className="auth-background-shape auth-shape-one" />
-      <div className="auth-background-shape auth-shape-two" />
-      <div className="auth-background-grid" />
+    <AuthLayout showcase={loginShowcaseData}>
+      <div className="auth-form-heading">
+        <span className="auth-form-label">
+          Welcome back
+        </span>
 
-      <section className="auth-shell">
-        <div className="auth-showcase">
-          <div className="auth-showcase-header">
-            <Link to="/" className="auth-brand">
-              <span className="auth-brand-icon">
-                <img
-                  src={logo}
-                  alt="CareerPilot"
-                  className="auth-logo-image"
-                />
-              </span>
+        <h2>Sign in to your account</h2>
 
-              <span className="auth-brand-name">
-                CareerPilot
-                <span>AI</span>
-              </span>
-            </Link>
+        <p>
+          Continue from where you left off and
+          take your next career step.
+        </p>
+      </div>
 
-            <Link to="/" className="auth-back-link">
-              <FiArrowLeft />
-              Back to home
-            </Link>
-          </div>
+      <button
+        type="button"
+        className="auth-google-button"
+        onClick={handleGoogleLogin}
+        disabled={isSubmitting}
+      >
+        <FcGoogle />
+        Continue with Google
+      </button>
 
-          <div className="auth-showcase-content">
-            <div className="auth-eyebrow">
-              <FiCheckCircle />
-              Your career workspace
-            </div>
+      <div className="auth-divider">
+        <span />
+        <p>or continue with email</p>
+        <span />
+      </div>
 
-            <h1>
-              Build a career path that feels
-              <span> clear and achievable.</span>
-            </h1>
+      <form
+        className="auth-form"
+        onSubmit={handleSubmit}
+        noValidate
+      >
+        <AuthInput
+          name="email"
+          label="Email address"
+          type="email"
+          value={formData.email}
+          placeholder="you@example.com"
+          autoComplete="email"
+          icon={FiMail}
+          error={errors.email}
+          disabled={isSubmitting}
+          onChange={handleChange}
+        />
 
-            <p className="auth-showcase-description">
-              Sign in to continue improving your resume, preparing for
-              interviews and discovering the right opportunities.
-            </p>
-
-            <div className="auth-benefits">
-              {loginBenefits.map((benefit) => {
-                const Icon = benefit.icon;
-
-                return (
-                  <article className="auth-benefit-card" key={benefit.title}>
-                    <span className="auth-benefit-icon">
-                      <Icon />
-                    </span>
-
-                    <div>
-                      <h2>{benefit.title}</h2>
-                      <p>{benefit.description}</p>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-
-            <div className="auth-progress-card">
-              <div className="auth-progress-header">
-                <div>
-                  <span>Career readiness</span>
-                  <strong>Keep growing</strong>
-                </div>
-
-                <span className="auth-progress-score">82%</span>
-              </div>
-
-              <div className="auth-progress-track">
-                <span />
-              </div>
-
-              <div className="auth-progress-footer">
-                <span>Resume</span>
-                <span>Skills</span>
-                <span>Interview</span>
-              </div>
-            </div>
-          </div>
-
-          <p className="auth-showcase-footer">
-            CareerPilot AI helps you make better career decisions while keeping
-            you in control.
-          </p>
-        </div>
-
-        <div className="auth-form-section">
-          <div className="auth-mobile-header">
-            <Link to="/" className="auth-brand">
-              <span className="auth-brand-icon">
-                <img
-                  src={logo}
-                  alt="CareerPilot"
-                  className="auth-logo-image"
-                />
-              </span>
-
-              <span className="auth-brand-name">
-                CareerPilot
-                <span>AI</span>
-              </span>
-            </Link>
-
+        <AuthInput
+          name="password"
+          label="Password"
+          type="password"
+          value={formData.password}
+          placeholder="Enter your password"
+          autoComplete="current-password"
+          icon={FiLock}
+          error={errors.password}
+          disabled={isSubmitting}
+          onChange={handleChange}
+          showPassword={showPassword}
+          onTogglePassword={() =>
+            setShowPassword(
+              (previousValue) =>
+                !previousValue,
+            )
+          }
+          labelAction={
             <Link
-              to="/"
-              className="auth-mobile-back"
-              aria-label="Back to home"
+              to="/forgot-password"
+              className="login-forgot-link"
             >
-              <FiArrowLeft />
+              Forgot password?
             </Link>
-          </div>
+          }
+        />
 
-          <div className="auth-form-container">
-            <div className="auth-form-heading">
-              <span className="auth-form-label">Welcome back</span>
+        <label className="auth-checkbox-option">
+          <input
+            type="checkbox"
+            name="rememberMe"
+            checked={formData.rememberMe}
+            onChange={handleChange}
+            disabled={isSubmitting}
+          />
 
-              <h2>Sign in to your account</h2>
+          <span className="auth-custom-checkbox">
+            <FiCheckCircle />
+          </span>
 
-              <p>
-                Continue from where you left off and take your next career
-                step.
-              </p>
-            </div>
+          <span>
+            Keep me signed in on this device
+          </span>
+        </label>
 
-            <button
-              type="button"
-              className="auth-google-button"
-              onClick={handleGoogleLogin}
-            >
-              <FcGoogle />
-              Continue with Google
-            </button>
+        {errors.submit && (
+          <span className="auth-error-message">
+            {errors.submit}
+          </span>
+        )}
 
-            <div className="auth-divider">
-              <span />
-              <p>or continue with email</p>
-              <span />
-            </div>
+        <button
+          type="submit"
+          className="auth-submit-button"
+          disabled={isSubmitting}
+        >
+          {isSubmitting
+            ? "Signing in..."
+            : "Sign in"}
 
-            <form className="auth-form" onSubmit={handleSubmit} noValidate>
-              <div className="auth-form-group">
-                <label htmlFor="email">Email address</label>
+          {!isSubmitting && <FiArrowRight />}
+        </button>
+      </form>
 
-                <div
-                  className={`auth-input-wrapper ${
-                    errors.email ? "auth-input-error" : ""
-                  }`}
-                >
-                  <FiMail className="auth-input-icon" />
+      <p className="auth-switch-text">
+        New to CareerPilot?{" "}
+        <Link to="/register">
+          Create your free account
+        </Link>
+      </p>
 
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                  />
-                </div>
-
-                {errors.email && (
-                  <span className="auth-error-message">{errors.email}</span>
-                )}
-              </div>
-
-              <div className="auth-form-group">
-                <div className="auth-label-row">
-                  <label htmlFor="password">Password</label>
-
-                  <Link to="/forgot-password" className="login-forgot-link">
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <div
-                  className={`auth-input-wrapper ${
-                    errors.password ? "auth-input-error" : ""
-                  }`}
-                >
-                  <FiLock className="auth-input-icon" />
-
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Enter your password"
-                    autoComplete="current-password"
-                  />
-
-                  <button
-                    type="button"
-                    className="auth-password-toggle"
-                    onClick={() =>
-                      setShowPassword((previousValue) => !previousValue)
-                    }
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
-                  </button>
-                </div>
-
-                {errors.password && (
-                  <span className="auth-error-message">{errors.password}</span>
-                )}
-              </div>
-
-              <label className="auth-checkbox-option">
-                <input
-                  type="checkbox"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                />
-
-                <span className="auth-custom-checkbox">
-                  <FiCheckCircle />
-                </span>
-
-                <span>Keep me signed in on this device</span>
-              </label>
-
-              <button type="submit" className="auth-submit-button">
-                Sign in
-                <FiArrowRight />
-              </button>
-            </form>
-
-            <p className="auth-switch-text">
-              New to CareerPilot?
-              <Link to="/register">Create your free account</Link>
-            </p>
-
-            <p className="auth-terms-text">
-              By continuing, you agree to our
-              <Link to="/terms"> Terms of Service </Link>
-              and
-              <Link to="/privacy"> Privacy Policy</Link>.
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
+      <p className="auth-terms-text">
+        By continuing, you agree to our
+        <Link to="/terms">
+          {" "}
+          Terms of Service{" "}
+        </Link>
+        and
+        <Link to="/privacy">
+          {" "}
+          Privacy Policy
+        </Link>
+        .
+      </p>
+    </AuthLayout>
   );
 };
 

@@ -1,0 +1,14 @@
+{
+  "name": "careerpilot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CareerPilot - AI Powered Career Guidance Platform",
+  "scripts": {
+    "client": "npm run dev --prefix client",
+    "server": "npm start --prefix server",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
