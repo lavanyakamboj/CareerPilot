@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
@@ -7,7 +7,10 @@ import Topbar from "./Topbar";
 import "../../styles/dashboard/dashboard.css";
 
 const DashboardLayout = () => {
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const openSidebar = () => {
     setIsSidebarOpen(true);
@@ -17,27 +20,69 @@ const DashboardLayout = () => {
     setIsSidebarOpen(false);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((previousState) => !previousState);
+  };
+
+  useEffect(() => {
+    closeSidebar();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.classList.add("dashboard-menu-open");
+    } else {
+      document.body.classList.remove("dashboard-menu-open");
+    }
+
+    return () => {
+      document.body.classList.remove("dashboard-menu-open");
+    };
+  }, [isSidebarOpen]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
-    <div className="dashboard-layout">
+    <div
+      className={`dashboard-layout ${
+        isSidebarCollapsed ? "dashboard-layout--collapsed" : ""
+      }`}
+    >
       <Sidebar
-        isSidebarOpen={isSidebarOpen}
-        closeSidebar={closeSidebar}
+        isOpen={isSidebarOpen}
+        isCollapsed={isSidebarCollapsed}
+        onClose={closeSidebar}
+        onToggleCollapse={toggleSidebar}
       />
 
       {isSidebarOpen && (
         <button
           type="button"
-          className="dashboard-sidebar-overlay"
-          onClick={closeSidebar}
+          className="dashboard-overlay"
           aria-label="Close sidebar"
+          onClick={closeSidebar}
         />
       )}
 
       <div className="dashboard-main">
-        <Topbar openSidebar={openSidebar} />
+        <Topbar onOpenSidebar={openSidebar} />
 
         <main className="dashboard-content">
-          <Outlet />
+          <div className="dashboard-content__inner">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

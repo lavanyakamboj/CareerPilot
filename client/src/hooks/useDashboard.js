@@ -1,47 +1,59 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
 import { getDashboardSummary } from "../services/dashboardApi";
+import { mapDashboardData } from "../utils/mapDashboardData";
+
+const getStoredUser = () => {
+  try {
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+      return null;
+    }
+
+    return JSON.parse(storedUser);
+  } catch (error) {
+    console.error("Unable to read stored user:", error);
+    return null;
+  }
+};
 
 const useDashboard = () => {
-  const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchDashboard = useCallback(async () => {
+  const loadDashboard = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       setError("");
 
-      const resumeId = localStorage.getItem("selectedResumeId");
+      const summary = await getDashboardSummary();
+      const storedUser = getStoredUser();
 
-      if (!resumeId) {
-        setDashboard(null);
-        return;
-      }
-
-      const data = await getDashboardSummary(resumeId);
-
-      setDashboard(data);
+      setData(mapDashboardData(summary, storedUser));
     } catch (requestError) {
-      console.error("Dashboard fetch error:", requestError);
+      console.error("Dashboard loading failed:", requestError);
 
-      setError(
+      const message =
         requestError.response?.data?.message ||
-          "We could not load your career workspace."
-      );
+        "Unable to load your dashboard. Please refresh and try again.";
+
+      setError(message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+    loadDashboard();
+  }, []);
 
   return {
-    dashboard,
-    loading,
+    data,
+    isLoading,
     error,
-    refetchDashboard: fetchDashboard,
+    refetch: loadDashboard,
   };
 };
 

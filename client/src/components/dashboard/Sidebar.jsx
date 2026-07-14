@@ -1,151 +1,242 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
-
 import {
-  FiGrid,
-  FiFileText,
   FiBarChart2,
-  FiTarget,
-  FiMessageSquare,
-  FiMap,
-  FiBook,
+  FiBookOpen,
   FiBriefcase,
-  FiEdit3,
-  FiSettings,
+  FiChevronLeft,
+  FiChevronRight,
+  FiFileText,
+  FiHome,
   FiLogOut,
+  FiMap,
+  FiMessageSquare,
+  FiTarget,
+  FiUser,
   FiX,
 } from "react-icons/fi";
+import { NavLink, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import logo from "../../assets/images/logo.png";
 
 import "../../styles/dashboard/sidebar.css";
 
-const menuItems = [
+const workspaceLinks = [
   {
-    title: "Dashboard",
-    icon: <FiGrid />,
+    label: "Overview",
     path: "/dashboard",
+    icon: FiHome,
+    end: true,
   },
   {
-    title: "My Resume",
-    icon: <FiFileText />,
-    path: "/dashboard/resume",
+    label: "My Resumes",
+    path: "/dashboard/resumes",
+    icon: FiFileText,
   },
   {
-    title: "Resume Analysis",
-    icon: <FiBarChart2 />,
+    label: "AI Analysis",
     path: "/dashboard/analysis",
+    icon: FiBarChart2,
   },
   {
-    title: "JD Match",
-    icon: <FiTarget />,
-    path: "/dashboard/jd-match",
-  },
-  {
-    title: "Interview",
-    icon: <FiMessageSquare />,
-    path: "/dashboard/interview",
-  },
-  {
-    title: "Roadmap",
-    icon: <FiMap />,
+    label: "Career Roadmap",
     path: "/dashboard/roadmap",
+    icon: FiMap,
   },
   {
-    title: "Resources",
-    icon: <FiBook />,
-    path: "/dashboard/resources",
-  },
-  {
-    title: "Jobs",
-    icon: <FiBriefcase />,
+    label: "Job Matches",
     path: "/dashboard/jobs",
+    icon: FiBriefcase,
   },
   {
-    title: "Cover Letter",
-    icon: <FiEdit3 />,
+    label: "Learning Resources",
+    path: "/dashboard/resources",
+    icon: FiBookOpen,
+  },
+  {
+    label: "Interview Prep",
+    path: "/dashboard/interview",
+    icon: FiMessageSquare,
+  },
+  {
+    label: "Cover Letter",
     path: "/dashboard/cover-letter",
-  },
-  {
-    title: "Settings",
-    icon: <FiSettings />,
-    path: "/dashboard/settings",
+    icon: FiTarget,
   },
 ];
 
-const Sidebar = ({ isSidebarOpen, closeSidebar }) => {
+const accountLinks = [
+  {
+    label: "Profile",
+    path: "/dashboard/profile",
+    icon: FiUser,
+  },
+];
+
+const Sidebar = ({
+  isOpen,
+  isCollapsed,
+  onClose,
+  onToggleCollapse,
+}) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    toast.success("Logged out successfully");
+
+    navigate("/login", {
+      replace: true,
+    });
+  };
+
+  const getLinkClassName = ({ isActive }) =>
+    `dashboard-sidebar__link ${
+      isActive ? "dashboard-sidebar__link--active" : ""
+    }`;
+
   return (
     <aside
       className={`dashboard-sidebar ${
-        isSidebarOpen ? "sidebar-open" : ""
-      }`}
+        isOpen ? "dashboard-sidebar--open" : ""
+      } ${isCollapsed ? "dashboard-sidebar--collapsed" : ""}`}
     >
-      {/* Logo */}
-
-      <div className="sidebar-header">
-
+      <div className="dashboard-sidebar__header">
         <NavLink
           to="/dashboard"
-          className="sidebar-brand"
+          className="dashboard-sidebar__brand"
+          aria-label="CareerPilot dashboard"
         >
-          <img
-            src={logo}
-            alt="CareerPilot"
-            className="sidebar-logo"
-          />
+          <span className="dashboard-sidebar__logo-box">
+            <img
+              src={logo}
+              alt="CareerPilot logo"
+              className="dashboard-sidebar__logo"
+            />
+          </span>
 
-          <div className="sidebar-brand-text">
-            <h2>CareerPilot</h2>
-            <span>AI Career Assistant</span>
-          </div>
+          <span className="dashboard-sidebar__brand-content">
+            <span className="dashboard-sidebar__brand-name">
+              CareerPilot
+              <span>AI</span>
+            </span>
+
+            <span className="dashboard-sidebar__brand-tagline">
+              Career workspace
+            </span>
+          </span>
         </NavLink>
 
         <button
-          className="sidebar-close-btn"
-          onClick={closeSidebar}
+          type="button"
+          className="dashboard-sidebar__close"
+          aria-label="Close sidebar"
+          onClick={onClose}
         >
           <FiX />
         </button>
       </div>
 
-      {/* Navigation */}
+      <div className="dashboard-sidebar__body">
+        <div className="dashboard-sidebar__group">
+          <p className="dashboard-sidebar__group-title">Workspace</p>
 
-      <nav className="sidebar-menu">
+          <nav className="dashboard-sidebar__nav">
+            {workspaceLinks.map((item) => {
+              const Icon = item.icon;
 
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === "/dashboard"}
-            className={({ isActive }) =>
-              isActive
-                ? "sidebar-link active"
-                : "sidebar-link"
-            }
-            onClick={closeSidebar}
-          >
-            <span className="sidebar-icon">
-              {item.icon}
-            </span>
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.end}
+                  className={getLinkClassName}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <span className="dashboard-sidebar__link-icon">
+                    <Icon />
+                  </span>
 
-            <span>{item.title}</span>
-          </NavLink>
-        ))}
+                  <span className="dashboard-sidebar__link-text">
+                    {item.label}
+                  </span>
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
 
-      </nav>
+        <div className="dashboard-sidebar__group dashboard-sidebar__group--account">
+          <p className="dashboard-sidebar__group-title">Account</p>
 
-      {/* Bottom */}
+          <nav className="dashboard-sidebar__nav">
+            {accountLinks.map((item) => {
+              const Icon = item.icon;
 
-      <div className="sidebar-footer">
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={getLinkClassName}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <span className="dashboard-sidebar__link-icon">
+                    <Icon />
+                  </span>
 
+                  <span className="dashboard-sidebar__link-text">
+                    {item.label}
+                  </span>
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="dashboard-sidebar__resume-card">
+          <span className="dashboard-sidebar__resume-icon">
+            <FiTarget />
+          </span>
+
+          <div className="dashboard-sidebar__resume-content">
+            <strong>Improve your profile</strong>
+
+            <p>
+              Upload your latest resume to receive better AI recommendations.
+            </p>
+
+            <NavLink to="/dashboard/resumes">
+              Upload resume
+              <FiChevronRight />
+            </NavLink>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-sidebar__footer">
         <button
-          className="sidebar-logout-btn"
+          type="button"
+          className="dashboard-sidebar__logout"
+          onClick={handleLogout}
+          title={isCollapsed ? "Logout" : undefined}
         >
           <FiLogOut />
 
           <span>Logout</span>
         </button>
 
+        <button
+          type="button"
+          className="dashboard-sidebar__collapse"
+          aria-label={
+            isCollapsed ? "Expand sidebar" : "Collapse sidebar"
+          }
+          onClick={onToggleCollapse}
+        >
+          {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+        </button>
       </div>
     </aside>
   );

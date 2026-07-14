@@ -79,94 +79,76 @@ const Login = () => {
 
     return newErrors;
   };
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const validationErrors = validateForm();
 
-    const validationErrors = validateForm();
+  if (Object.keys(validationErrors).length > 0) {
+    setErrors(validationErrors);
+    return;
+  }
 
-    if (
-      Object.keys(validationErrors).length > 0
-    ) {
-      setErrors(validationErrors);
-      return;
+  try {
+    setIsSubmitting(true);
+    setErrors({});
+
+    const response = await api.post("/auth/login", {
+      email: formData.email.trim().toLowerCase(),
+      password: formData.password,
+    });
+
+    console.log("Login response:", response.data);
+
+    const token =
+      response.data?.token ||
+      response.data?.data?.token;
+
+    const user =
+      response.data?.user ||
+      response.data?.data?.user;
+
+    if (!token) {
+      throw new Error(
+        "Login succeeded, but authentication token was not received.",
+      );
     }
 
-    try {
-      setIsSubmitting(true);
-      setErrors({});
+    localStorage.setItem("token", token);
 
-      const response = await api.post(
-        "/auth/login",
-        {
-          email: formData.email
-            .trim()
-            .toLowerCase(),
-          password: formData.password,
-        },
-      );
-
-      const token =
-        response.data?.token ||
-        response.data?.data?.token;
-
-      const user =
-        response.data?.user ||
-        response.data?.data?.user;
-
-      if (!token) {
-        throw new Error(
-          "Authentication token was not received.",
-        );
-      }
-
+    if (user) {
       localStorage.setItem(
-        "careerPilotToken",
-        token,
+        "user",
+        JSON.stringify(user),
       );
-
-      if (user) {
-        localStorage.setItem(
-          "careerPilotUser",
-          JSON.stringify(user),
-        );
-      }
-
-      if (formData.rememberMe) {
-        localStorage.setItem(
-          "careerPilotRememberMe",
-          "true",
-        );
-      } else {
-        localStorage.removeItem(
-          "careerPilotRememberMe",
-        );
-      }
-
-      toast.success(
-        "Welcome back to CareerPilot!",
-      );
-
-      navigate("/dashboard", {
-        replace: true,
-      });
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Unable to sign in. Please try again.";
-
-      setErrors((previousErrors) => ({
-        ...previousErrors,
-        submit: message,
-      }));
-
-      toast.error(message);
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    toast.success("Login successful!");
+
+    const redirectPath =
+      location.state?.from || "/dashboard";
+
+    navigate(redirectPath, {
+      replace: true,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "Unable to login. Please try again.";
+
+    setErrors({
+      submit: message,
+    });
+
+    toast.error(message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleGoogleLogin = () => {
     toast(
