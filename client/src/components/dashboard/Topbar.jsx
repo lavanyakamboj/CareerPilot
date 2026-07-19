@@ -1,15 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  FiAlertCircle,
+  FiBarChart2,
   FiBell,
+  FiBriefcase,
   FiChevronDown,
   FiLogOut,
+  FiMap,
   FiMenu,
-  FiSearch,
+  FiMessageSquare,
   FiSettings,
   FiUser,
 } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+
+import useDashboard from "../../hooks/useDashboard";
+import { logoutUser } from "../../services/authApi";
 
 import "../../styles/dashboard/topbar.css";
 
@@ -21,12 +28,7 @@ const pageInformation = {
 
   "/dashboard/resumes": {
     title: "My Resumes",
-    description: "Upload and manage your resume versions.",
-  },
-
-  "/dashboard/analysis": {
-    title: "AI Analysis",
-    description: "Review your resume insights and improvement areas.",
+    description: "Upload, extract and analyze your resume in one place.",
   },
 
   "/dashboard/roadmap": {
@@ -60,6 +62,20 @@ const pageInformation = {
   },
 };
 
+const activityIcons = {
+  analysis: FiBarChart2,
+  roadmap: FiMap,
+  job: FiBriefcase,
+  interview: FiMessageSquare,
+};
+
+const activityLinks = {
+  analysis: "/dashboard/resumes",
+  roadmap: "/dashboard/roadmap",
+  job: "/dashboard/jobs",
+  interview: "/dashboard/interview",
+};
+
 const getUserFromStorage = () => {
   try {
     const savedUser = localStorage.getItem("user");
@@ -79,9 +95,16 @@ const Topbar = ({ onOpenSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const profileRef = useRef(null);
+  const notificationRef = useRef(null);
 
-  const [searchValue, setSearchValue] = useState("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  // Bell ke liye asli data — pehle yeh hardcoded/fake tha (koi onClick
+  // nahi tha, dot hamesha dikhta tha). Ab dashboard summary se hi
+  // "pending action" nudges (jo abhi tak complete nahi hui) aur recent
+  // activity dikhate hain.
+  const { data: dashboardData } = useDashboard();
 
   const user = getUserFromStorage();
 
@@ -98,8 +121,59 @@ const Topbar = ({ onOpenSidebar }) => {
   const currentPage =
     pageInformation[location.pathname] || pageInformation["/dashboard"];
 
+  const pendingNudges = [];
+
+  if (dashboardData) {
+    const resumeScoreStat = dashboardData.stats?.find(
+      (stat) => stat.id === "resume-score",
+    );
+    const interviewStat = dashboardData.stats?.find(
+      (stat) => stat.id === "interview-questions",
+    );
+
+    if (resumeScoreStat?.value === "--") {
+      pendingNudges.push({
+        id: "nudge-resume",
+        title: "Analyze your resume",
+        description: "Upload and analyze your resume to get your AI score.",
+        link: "/dashboard/resumes",
+      });
+    }
+
+    if (!dashboardData.roadmap?.totalPhases) {
+      pendingNudges.push({
+        id: "nudge-roadmap",
+        title: "Generate your career roadmap",
+        description: "Get a personalized, phase-wise preparation plan.",
+        link: "/dashboard/roadmap",
+      });
+    }
+
+    if (interviewStat?.value === "0") {
+      pendingNudges.push({
+        id: "nudge-interview",
+        title: "Practice interview questions",
+        description: "Generate personalized technical and HR questions.",
+        link: "/dashboard/interview",
+      });
+    }
+  }
+
+  const recentActivityNotifications = (dashboardData?.activities || [])
+    .slice(0, 4)
+    .map((activity) => ({
+      id: `activity-${activity.id}`,
+      title: activity.title,
+      description: activity.time,
+      link: activityLinks[activity.type] || "/dashboard",
+      icon: activityIcons[activity.type] || FiBarChart2,
+    }));
+
+  const unreadCount = pendingNudges.length;
+
   useEffect(() => {
     setIsProfileOpen(false);
+    setIsNotificationOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -110,6 +184,13 @@ const Topbar = ({ onOpenSidebar }) => {
       ) {
         setIsProfileOpen(false);
       }
+
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setIsNotificationOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleOutsideClick);
@@ -119,19 +200,21 @@ const Topbar = ({ onOpenSidebar }) => {
     };
   }, []);
 
-  const handleSearch = (event) => {
-    event.preventDefault();
-
-    const query = searchValue.trim();
-
-    if (!query) {
-      return;
-    }
-
-    toast(`Searching for "${query}"`);
+  const handleNotificationNavigate = (link) => {
+    setIsNotificationOpen(false);
+    navigate(link);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Server-side token blacklist — taaki agar yeh token kahin leak
+      // ho jaaye (browser history, logs), logout ke baad wo kaam na kare.
+      await logoutUser();
+    } catch {
+      // Logout API fail bhi ho (e.g. network issue), phir bhi client-side
+      // session clear karte hain — user ko stuck nahi rakhte.
+    }
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
@@ -161,31 +244,91 @@ const Topbar = ({ onOpenSidebar }) => {
       </div>
 
       <div className="dashboard-topbar__right">
-        <form
-          className="dashboard-topbar__search"
-          onSubmit={handleSearch}
+        <div
+          className="dashboard-topbar__notification-wrapper"
+          ref={notificationRef}
         >
-          <FiSearch />
+          <button
+            type="button"
+            className="dashboard-topbar__notification"
+            aria-label="Notifications"
+            aria-expanded={isNotificationOpen}
+            onClick={() =>
+              setIsNotificationOpen((previousState) => !previousState)
+            }
+          >
+            <FiBell />
+            {unreadCount > 0 && (
+              <span className="dashboard-topbar__notification-dot" />
+            )}
+          </button>
 
-          <input
-            type="search"
-            value={searchValue}
-            placeholder="Search your workspace"
-            aria-label="Search dashboard"
-            onChange={(event) => setSearchValue(event.target.value)}
-          />
+          {isNotificationOpen && (
+            <div className="dashboard-topbar__notification-panel">
+              <div className="dashboard-topbar__notification-panel-header">
+                <strong>Notifications</strong>
+                {unreadCount > 0 && (
+                  <span>{unreadCount} need your attention</span>
+                )}
+              </div>
 
-          <span>⌘ K</span>
-        </form>
+              {pendingNudges.length === 0 &&
+                recentActivityNotifications.length === 0 && (
+                  <div className="dashboard-topbar__notification-empty">
+                    You're all caught up — nothing needs attention right now.
+                  </div>
+                )}
 
-        <button
-          type="button"
-          className="dashboard-topbar__notification"
-          aria-label="Notifications"
-        >
-          <FiBell />
-          <span className="dashboard-topbar__notification-dot" />
-        </button>
+              {pendingNudges.map((nudge) => (
+                <button
+                  type="button"
+                  key={nudge.id}
+                  className="dashboard-topbar__notification-item dashboard-topbar__notification-item--action"
+                  onClick={() => handleNotificationNavigate(nudge.link)}
+                >
+                  <span className="dashboard-topbar__notification-item-icon">
+                    <FiAlertCircle />
+                  </span>
+
+                  <span className="dashboard-topbar__notification-item-content">
+                    <strong>{nudge.title}</strong>
+                    <small>{nudge.description}</small>
+                  </span>
+                </button>
+              ))}
+
+              {recentActivityNotifications.length > 0 && (
+                <>
+                  <div className="dashboard-topbar__dropdown-divider" />
+
+                  {recentActivityNotifications.map((activity) => {
+                    const Icon = activity.icon;
+
+                    return (
+                      <button
+                        type="button"
+                        key={activity.id}
+                        className="dashboard-topbar__notification-item"
+                        onClick={() =>
+                          handleNotificationNavigate(activity.link)
+                        }
+                      >
+                        <span className="dashboard-topbar__notification-item-icon">
+                          <Icon />
+                        </span>
+
+                        <span className="dashboard-topbar__notification-item-content">
+                          <strong>{activity.title}</strong>
+                          <small>{activity.description}</small>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
         <div
           className="dashboard-topbar__profile-wrapper"

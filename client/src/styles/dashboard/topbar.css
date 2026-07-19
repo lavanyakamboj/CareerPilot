@@ -88,85 +88,6 @@
   min-width: 0;
 }
 
-.dashboard-topbar__search {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-
-  width: min(300px, 24vw);
-  height: 44px;
-}
-
-.dashboard-topbar__search > svg {
-  position: absolute;
-  left: 14px;
-  z-index: 1;
-
-  color: #9491a2;
-
-  font-size: 17px;
-
-  pointer-events: none;
-}
-
-.dashboard-topbar__search input {
-  width: 100%;
-  height: 100%;
-
-  padding: 0 55px 0 42px;
-
-  border: 1px solid #e2e3ea;
-  border-radius: 13px;
-  outline: none;
-
-  color: #2a2837;
-  background: rgba(255, 255, 255, 0.88);
-
-  font-family: inherit;
-  font-size: 12.5px;
-
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease;
-}
-
-.dashboard-topbar__search input::placeholder {
-  color: #a09dac;
-}
-
-.dashboard-topbar__search input:focus {
-  border-color: rgba(127, 94, 241, 0.48);
-
-  background: #ffffff;
-
-  box-shadow: 0 0 0 4px rgba(127, 94, 241, 0.09);
-}
-
-.dashboard-topbar__search > span {
-  position: absolute;
-  right: 10px;
-
-  display: grid;
-  place-items: center;
-
-  min-width: 34px;
-  height: 24px;
-  padding: 0 6px;
-
-  border: 1px solid #e3e3e9;
-  border-radius: 7px;
-
-  color: #9995a6;
-  background: #f7f7fa;
-
-  font-size: 9px;
-  font-weight: 650;
-
-  pointer-events: none;
-}
-
 .dashboard-topbar__notification {
   position: relative;
 
@@ -218,6 +139,139 @@
   border-radius: 50%;
 
   background: #ff5e78;
+}
+
+.dashboard-topbar__notification-wrapper {
+  position: relative;
+}
+
+.dashboard-topbar__notification-panel {
+  position: absolute;
+  top: calc(100% + 11px);
+  right: 0;
+  z-index: 1200;
+
+  overflow-y: auto;
+
+  width: 320px;
+  max-height: 380px;
+  padding: 9px;
+
+  border: 1px solid #e5e4eb;
+  border-radius: 17px;
+
+  background: rgba(255, 255, 255, 0.98);
+
+  box-shadow:
+    0 24px 55px rgba(35, 30, 64, 0.14),
+    0 4px 12px rgba(35, 30, 64, 0.05);
+
+  animation: topbar-dropdown-open 160ms ease;
+}
+
+.dashboard-topbar__notification-panel-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 8px 10px 10px;
+}
+
+.dashboard-topbar__notification-panel-header strong {
+  color: #302d3c;
+
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.dashboard-topbar__notification-panel-header span {
+  color: #7455df;
+
+  font-size: 10.5px;
+  font-weight: 650;
+
+  white-space: nowrap;
+}
+
+.dashboard-topbar__notification-empty {
+  padding: 22px 10px;
+
+  color: #9692a2;
+
+  font-size: 12px;
+  text-align: center;
+}
+
+.dashboard-topbar__notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  width: 100%;
+
+  padding: 9px 10px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition: background 150ms ease;
+}
+
+.dashboard-topbar__notification-item:hover {
+  background: #f5f2ff;
+}
+
+.dashboard-topbar__notification-item-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 10px;
+
+  color: #7455df;
+  background: #f1eeff;
+
+  font-size: 15px;
+}
+
+.dashboard-topbar__notification-item--action
+  .dashboard-topbar__notification-item-icon {
+  color: #b96b21;
+  background: #fdf1e4;
+}
+
+.dashboard-topbar__notification-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  min-width: 0;
+}
+
+.dashboard-topbar__notification-item-content strong {
+  color: #2a2837;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dashboard-topbar__notification-item-content small {
+  color: #9692a2;
+
+  font-size: 10.5px;
+  line-height: 1.5;
+
+  white-space: normal;
 }
 
 .dashboard-topbar__profile-wrapper {
@@ -452,10 +506,6 @@
 }
 
 @media (max-width: 1180px) {
-  .dashboard-topbar__search {
-    width: 220px;
-  }
-
   .dashboard-topbar__profile {
     min-width: 170px;
   }
@@ -469,16 +519,6 @@
 
   .dashboard-topbar__menu {
     display: grid;
-  }
-
-  .dashboard-topbar__search {
-    width: 210px;
-  }
-}
-
-@media (max-width: 860px) {
-  .dashboard-topbar__search {
-    display: none;
   }
 }
 
@@ -527,6 +567,12 @@
 
     width: min(256px, calc(100vw - 28px));
   }
+
+  .dashboard-topbar__notification-panel {
+    right: -2px;
+
+    width: min(320px, calc(100vw - 28px));
+  }
 }
 
 @media (max-width: 420px) {
@@ -552,9 +598,5 @@
     font-size: 17px;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .dashboard-topbar__notification {
-    display: none;
   }
 }

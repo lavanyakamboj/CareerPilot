@@ -16,12 +16,15 @@ import {
 
 import { FcGoogle } from "react-icons/fc";
 
-import api from "../api/api";
+import { registerUser } from "../services/authApi";
 
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthInput from "../components/auth/AuthInput";
+import PasswordChecklist from "../components/auth/PasswordChecklist";
 
 import useAuthForm from "../hooks/useAuthForm";
+
+import { isPasswordValid, PASSWORD_HINT } from "../utils/passwordRules";
 
 import {
   registerInitialValues,
@@ -80,9 +83,8 @@ const Register = () => {
     if (!formData.password) {
       newErrors.password =
         "Password is required.";
-    } else if (formData.password.length < 6) {
-      newErrors.password =
-        "Password must contain at least 6 characters.";
+    } else if (!isPasswordValid(formData.password)) {
+      newErrors.password = PASSWORD_HINT;
     }
 
     if (!formData.confirmPassword) {
@@ -133,14 +135,18 @@ const Register = () => {
         password: formData.password,
       };
 
-      const response = await api.post(
-        "/auth/register",
+      const data = await registerUser(
         registerData,
       );
 
+      console.log(
+        "Registration response:",
+        data,
+      );
+
       toast.success(
-        response.data?.message ||
-          "Account created successfully. Please sign in.",
+        data?.message ||
+        "Account created! Please check your email to verify your account before signing in.",
       );
 
       navigate("/login", {
@@ -148,6 +154,7 @@ const Register = () => {
         state: {
           registeredEmail:
             registerData.email,
+          justRegistered: true,
         },
       });
     } catch (error) {
@@ -253,7 +260,7 @@ const Register = () => {
           autoComplete="new-password"
           icon={FiLock}
           error={errors.password}
-          hint="Use at least 6 characters."
+          hint={PASSWORD_HINT}
           disabled={isSubmitting}
           onChange={handleChange}
           showPassword={showPassword}
@@ -264,6 +271,8 @@ const Register = () => {
             )
           }
         />
+
+        <PasswordChecklist password={formData.password} />
 
         <AuthInput
           name="confirmPassword"

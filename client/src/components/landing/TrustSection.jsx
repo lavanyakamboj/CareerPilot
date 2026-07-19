@@ -33,13 +33,16 @@ const trustItems = [
 
 const TrustSection = () => {
   return (
-    <section className="trust-section" id="about">
+    <section className="trust-section" id="features">
       <div className="container">
         <div className="trust-intro">
+          <span className="trust-intro-line" />
           <p>
-            CareerPilot does not just show you more information. It helps you
-            understand what to do next.
+            CareerPilot does not just show you more information.<br/>
+            <strong> It helps you understand what to do next.</strong>
           </p>
+
+          <span className="trust-intro-line" />
         </div>
 
         <div className="trust-grid">

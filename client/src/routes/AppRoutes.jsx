@@ -8,25 +8,20 @@ import {
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 
+import CoverLetter from "../pages/CoverLetter";
 import Dashboard from "../pages/Dashboard";
+import ForgotPassword from "../pages/ForgotPassword";
+import Interview from "../pages/Interview";
+import Jobs from "../pages/Jobs";
 import LandingPage from "../pages/LandingPage";
 import Login from "../pages/Login";
+import Profile from "../pages/Profile";
 import Register from "../pages/Register";
-
-const DashboardPlaceholder = ({ title }) => {
-  return (
-    <section className="dashboard-placeholder">
-      <span>CareerPilot AI</span>
-
-      <h2>{title}</h2>
-
-      <p>
-        This dashboard feature will be connected in the next development
-        phase.
-      </p>
-    </section>
-  );
-};
+import Resources from "../pages/Resources";
+import Resumes from "../pages/Resumes";
+import ResetPassword from "../pages/ResetPassword";
+import Roadmap from "../pages/Roadmap";
+import VerifyEmail from "../pages/VerifyEmail";
 
 const AppRoutes = () => {
   return (
@@ -35,51 +30,29 @@ const AppRoutes = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
       {/* Protected dashboard routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
 
-          <Route
-            path="resumes"
-            element={<DashboardPlaceholder title="My Resumes" />}
-          />
+          <Route path="resumes" element={<Resumes />} />
 
-          <Route
-            path="analysis"
-            element={<DashboardPlaceholder title="AI Resume Analysis" />}
-          />
+          <Route path="roadmap" element={<Roadmap />} />
 
-          <Route
-            path="roadmap"
-            element={<DashboardPlaceholder title="Career Roadmap" />}
-          />
+          <Route path="jobs" element={<Jobs />} />
 
-          <Route
-            path="jobs"
-            element={<DashboardPlaceholder title="Job Matches" />}
-          />
+          <Route path="resources" element={<Resources />} />
 
-          <Route
-            path="resources"
-            element={<DashboardPlaceholder title="Learning Resources" />}
-          />
+          <Route path="interview" element={<Interview />} />
 
-          <Route
-            path="interview"
-            element={<DashboardPlaceholder title="Interview Preparation" />}
-          />
+          <Route path="cover-letter" element={<CoverLetter />} />
 
-          <Route
-            path="cover-letter"
-            element={<DashboardPlaceholder title="Cover Letter Generator" />}
-          />
-
-          <Route
-            path="profile"
-            element={<DashboardPlaceholder title="Profile Settings" />}
-          />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Route>
 

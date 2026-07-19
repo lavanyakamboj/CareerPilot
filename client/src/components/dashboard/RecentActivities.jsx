@@ -7,12 +7,21 @@ import {
   FiMap,
   FiMessageSquare,
 } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const activityIcons = {
   analysis: FiBarChart2,
   roadmap: FiMap,
   job: FiBriefcase,
   interview: FiMessageSquare,
+};
+
+// Activity type ke hisaab se sahi feature page par le jaate hain.
+const activityLinks = {
+  analysis: "/dashboard/resumes",
+  roadmap: "/dashboard/roadmap",
+  job: "/dashboard/jobs",
+  interview: "/dashboard/interview",
 };
 
 const RecentActivities = ({ activities = [] }) => {
@@ -36,11 +45,14 @@ const RecentActivities = ({ activities = [] }) => {
       <div className="recent-activities__list">
         {activities.slice(0, 5).map((activity) => {
           const Icon = activityIcons[activity.type] || FiCheckCircle;
+          const linkTo = activityLinks[activity.type] || "/dashboard";
 
           return (
-            <div
+            <Link
+              to={linkTo}
               key={activity.id}
               className="recent-activity"
+              style={{ textDecoration: "none", color: "inherit" }}
             >
               <span
                 className={`recent-activity__icon recent-activity__icon--${activity.type}`}
@@ -57,7 +69,7 @@ const RecentActivities = ({ activities = [] }) => {
                 <FiClock />
                 {activity.time}
               </span>
-            </div>
+            </Link>
           );
         })}
       </div>

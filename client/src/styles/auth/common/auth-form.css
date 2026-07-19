@@ -433,3 +433,74 @@
   outline: 3px solid rgba(120, 87, 230, 0.2);
   outline-offset: 3px;
 }
+/* Password requirements checklist */
+
+.auth-password-checklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+
+  margin: 2px 0 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.auth-password-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  color: var(--color-text-secondary, #8b889a);
+
+  font-size: 11px;
+}
+
+.auth-password-checklist li svg {
+  flex-shrink: 0;
+
+  font-size: 11px;
+}
+
+.auth-password-checklist__item--met {
+  color: #1e9e6a;
+}
+
+/* Info banner (e.g. "check your email") */
+
+.auth-info-banner {
+  margin: 2px 0 0;
+  padding: 12px 14px;
+
+  border: 1px solid rgba(30, 158, 106, 0.25);
+  border-radius: 12px;
+
+  background: rgba(30, 158, 106, 0.08);
+
+  color: #17795a;
+
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.auth-resend-link {
+  align-self: flex-start;
+
+  padding: 0;
+  border: none;
+
+  background: none;
+
+  color: var(--color-primary, #7857e6);
+
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+
+  cursor: pointer;
+}
+
+.auth-resend-link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

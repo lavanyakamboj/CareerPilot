@@ -34,7 +34,11 @@ const RoadmapPreview = ({ roadmap }) => {
         </Link>
       </div>
 
-      <div className="roadmap-preview__phase">
+      <Link
+        to="/dashboard/roadmap"
+        className="roadmap-preview__phase"
+        style={{ textDecoration: "none", color: "inherit" }}
+      >
         <span className="roadmap-preview__phase-icon">
           <FiMap />
         </span>
@@ -59,7 +63,7 @@ const RoadmapPreview = ({ roadmap }) => {
           <strong>{progress}%</strong>
           <span>completed</span>
         </div>
-      </div>
+      </Link>
 
       <div className="roadmap-preview__progress-bar">
         <span style={{ width: `${progress}%` }} />
@@ -75,18 +79,20 @@ const RoadmapPreview = ({ roadmap }) => {
 
       <div className="roadmap-preview__tasks">
         {tasks.slice(0, 4).map((task) => (
-          <div
+          <Link
+            to="/dashboard/roadmap"
             key={task.id}
             className={`roadmap-preview__task ${
               task.completed ? "roadmap-preview__task--completed" : ""
             }`}
+            style={{ textDecoration: "none", cursor: "pointer" }}
           >
             <span className="roadmap-preview__task-status">
               {task.completed ? <FiCheck /> : <FiCircle />}
             </span>
 
             <span>{task.title}</span>
-          </div>
+          </Link>
         ))}
       </div>
     </article>

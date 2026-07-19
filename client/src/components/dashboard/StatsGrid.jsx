@@ -6,6 +6,7 @@ import {
   FiMessageSquare,
   FiTrendingUp,
 } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const statIcons = {
   score: FiBarChart2,
@@ -14,16 +15,27 @@ const statIcons = {
   interview: FiMessageSquare,
 };
 
+// Stat card ke icon type ke hisaab se sahi feature page par le jaate hain.
+const statLinks = {
+  score: "/dashboard/resumes",
+  jobs: "/dashboard/jobs",
+  roadmap: "/dashboard/roadmap",
+  interview: "/dashboard/interview",
+};
+
 const StatsGrid = ({ stats = [] }) => {
   return (
     <section className="dashboard-stats">
       {stats.map((stat) => {
         const Icon = statIcons[stat.icon] || FiBarChart2;
+        const linkTo = statLinks[stat.icon] || "/dashboard";
 
         return (
-          <article
+          <Link
+            to={linkTo}
             key={stat.id}
             className="dashboard-stat-card"
+            style={{ textDecoration: "none", color: "inherit" }}
           >
             <div className="dashboard-stat-card__header">
               <span
@@ -56,7 +68,7 @@ const StatsGrid = ({ stats = [] }) => {
               <span />
               <span />
             </div>
-          </article>
+          </Link>
         );
       })}
     </section>

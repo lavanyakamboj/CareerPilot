@@ -16,7 +16,7 @@ import {
 
 import { FcGoogle } from "react-icons/fc";
 
-import api from "../api/api";
+import { loginUser, resendVerificationEmail } from "../services/authApi";
 
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthInput from "../components/auth/AuthInput";
@@ -40,6 +40,10 @@ const Login = () => {
 
   const registeredEmail =
     location.state?.registeredEmail || "";
+  const justRegistered = Boolean(location.state?.justRegistered);
+
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const {
     formData,
@@ -72,9 +76,6 @@ const Login = () => {
     if (!formData.password) {
       newErrors.password =
         "Password is required.";
-    } else if (formData.password.length < 6) {
-      newErrors.password =
-        "Password must contain at least 6 characters.";
     }
 
     return newErrors;
@@ -84,7 +85,9 @@ const handleSubmit = async (event) => {
 
   const validationErrors = validateForm();
 
-  if (Object.keys(validationErrors).length > 0) {
+  if (
+    Object.keys(validationErrors).length > 0
+  ) {
     setErrors(validationErrors);
     return;
   }
@@ -92,21 +95,22 @@ const handleSubmit = async (event) => {
   try {
     setIsSubmitting(true);
     setErrors({});
+    setNeedsVerification(false);
 
-    const response = await api.post("/auth/login", {
-      email: formData.email.trim().toLowerCase(),
+    const data = await loginUser({
+      email: formData.email
+        .trim()
+        .toLowerCase(),
       password: formData.password,
     });
 
-    console.log("Login response:", response.data);
-
     const token =
-      response.data?.token ||
-      response.data?.data?.token;
+      data?.token ||
+      data?.data?.token;
 
     const user =
-      response.data?.user ||
-      response.data?.data?.user;
+      data?.user ||
+      data?.data?.user;
 
     if (!token) {
       throw new Error(
@@ -126,19 +130,24 @@ const handleSubmit = async (event) => {
     toast.success("Login successful!");
 
     const redirectPath =
-      location.state?.from || "/dashboard";
+      location.state?.from ||
+      "/dashboard";
 
     navigate(redirectPath, {
       replace: true,
     });
   } catch (error) {
-    console.error("Login error:", error);
+    const code = error.response?.data?.code;
 
     const message =
       error.response?.data?.message ||
       error.response?.data?.error ||
       error.message ||
       "Unable to login. Please try again.";
+
+    if (code === "EMAIL_NOT_VERIFIED") {
+      setNeedsVerification(true);
+    }
 
     setErrors({
       submit: message,
@@ -149,6 +158,32 @@ const handleSubmit = async (event) => {
     setIsSubmitting(false);
   }
 };
+
+  const handleResendVerification = async () => {
+    if (!formData.email.trim()) {
+      toast.error("Enter your email address first.");
+      return;
+    }
+
+    try {
+      setIsResending(true);
+
+      const data = await resendVerificationEmail(
+        formData.email.trim().toLowerCase(),
+      );
+
+      toast.success(
+        data?.message || "Verification email sent — please check your inbox.",
+      );
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Couldn't resend verification email. Please try again.",
+      );
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   const handleGoogleLogin = () => {
     toast(
@@ -180,6 +215,13 @@ const handleSubmit = async (event) => {
         <FcGoogle />
         Continue with Google
       </button>
+
+      {justRegistered && (
+        <p className="auth-info-banner">
+          Account created! Please check <strong>{registeredEmail}</strong> for
+          a verification link before signing in.
+        </p>
+      )}
 
       <div className="auth-divider">
         <span />
@@ -255,6 +297,17 @@ const handleSubmit = async (event) => {
           <span className="auth-error-message">
             {errors.submit}
           </span>
+        )}
+
+        {needsVerification && (
+          <button
+            type="button"
+            className="auth-resend-link"
+            onClick={handleResendVerification}
+            disabled={isResending}
+          >
+            {isResending ? "Sending..." : "Resend verification email"}
+          </button>
         )}
 
         <button

@@ -5,8 +5,54 @@
 }
 
 .dashboard-main{
-  padding-left: 75px;
+  /* Sidebar "position: fixed" hai (250px expanded / 70px collapsed) aur
+     document flow se bahar hai, isliye main content ko utna hi padding
+     reserve karna zaroori hai — warna sidebar page content ke upar
+     overlap ho jaata hai (isse hi lagta tha ki sidebar "kaam mein aa
+     rahi hai" aur hamesha manually collapse karna padta tha). */
+  padding-left: 250px;
+
+  transition: padding-left 220ms ease;
 }
+
+.dashboard-layout--collapsed .dashboard-main {
+  padding-left: 70px;
+}
+
+/* Mobile sidebar backdrop — pehle yeh class istemal to ho rahi thi
+   (DashboardLayout.jsx) lekin kahin style hi nahi ki gayi thi, isliye
+   sidebar ke bahar click karke use band karna kaam nahi karta tha. */
+
+.dashboard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1090;
+
+  border: none;
+  padding: 0;
+
+  background: rgba(17, 12, 32, 0.45);
+  backdrop-filter: blur(2px);
+
+  cursor: pointer;
+  animation: dashboard-overlay-fade-in 0.2s ease;
+}
+
+@keyframes dashboard-overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-overlay {
+    display: none;
+  }
+}
+
 /* Welcome banner */
 
 .dashboard-welcome {
@@ -534,7 +580,8 @@
   transform: translateY(-2px);
 }
 @media (max-width: 1023px){
-  .dashboard-main{
+  .dashboard-main,
+  .dashboard-layout--collapsed .dashboard-main{
     padding-left: 10px;
     padding-right: 10px;
   }

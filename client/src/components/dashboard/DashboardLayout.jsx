@@ -54,6 +54,36 @@ const DashboardLayout = () => {
     };
   }, []);
 
+  // Sidebar ke bahar (main content area / page ke kisi bhi hisse) click
+  // karte hi sidebar apne aap band/collapse ho jaani chahiye — chahe
+  // mobile drawer ho (isOpen) ya desktop par expanded sidebar (isCollapsed).
+  // Sirf sidebar ke andar ka click, ya isse open karne wala hamburger
+  // button, is behaviour se exempt hai.
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      const clickedInsideSidebar = event.target.closest(".dashboard-sidebar");
+      const clickedMenuToggle = event.target.closest(
+        ".dashboard-topbar__menu",
+      );
+
+      if (clickedInsideSidebar || clickedMenuToggle) return;
+
+      if (isSidebarOpen) {
+        setIsSidebarOpen(false);
+      }
+
+      if (window.innerWidth >= 1024 && !isSidebarCollapsed) {
+        setIsSidebarCollapsed(true);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isSidebarOpen, isSidebarCollapsed]);
+
   return (
     <div
       className={`dashboard-layout ${

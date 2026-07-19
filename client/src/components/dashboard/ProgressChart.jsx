@@ -56,7 +56,7 @@ const ProgressChart = ({ progress = [] }) => {
         </div>
 
         <Link
-          to="/dashboard/analysis"
+          to="/dashboard/resumes"
           className="dashboard-panel__link"
         >
           View history

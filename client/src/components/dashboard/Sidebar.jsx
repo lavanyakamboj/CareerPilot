@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  FiBarChart2,
   FiBookOpen,
   FiBriefcase,
   FiChevronLeft,
@@ -18,6 +17,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import logo from "../../assets/images/logo.png";
+import { logoutUser } from "../../services/authApi";
 
 import "../../styles/dashboard/sidebar.css";
 
@@ -32,11 +32,6 @@ const workspaceLinks = [
     label: "My Resumes",
     path: "/dashboard/resumes",
     icon: FiFileText,
-  },
-  {
-    label: "AI Analysis",
-    path: "/dashboard/analysis",
-    icon: FiBarChart2,
   },
   {
     label: "Career Roadmap",
@@ -81,7 +76,13 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // Client-side session ko phir bhi clear karte hain.
+    }
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
@@ -108,6 +109,7 @@ const Sidebar = ({
           to="/dashboard"
           className="dashboard-sidebar__brand"
           aria-label="CareerPilot dashboard"
+          onClick={onClose}
         >
           <span className="dashboard-sidebar__logo-box">
             <img
@@ -139,7 +141,18 @@ const Sidebar = ({
         </button>
       </div>
 
-      <div className="dashboard-sidebar__body">
+      <div
+        className="dashboard-sidebar__body"
+        onClick={(event) => {
+          // Defensive fallback: agar kisi link ke apne onClick handler
+          // mein koi issue ho (event bubbling / library quirk), tab bhi
+          // yahan se guaranteed sidebar close ho jaayega jab bhi koi
+          // <a> (NavLink) click ho.
+          if (event.target.closest("a")) {
+            onClose();
+          }
+        }}
+      >
         <div className="dashboard-sidebar__group">
           <p className="dashboard-sidebar__group-title">Workspace</p>
 
@@ -154,6 +167,7 @@ const Sidebar = ({
                   end={item.end}
                   className={getLinkClassName}
                   title={isCollapsed ? item.label : undefined}
+                  onClick={onClose}
                 >
                   <span className="dashboard-sidebar__link-icon">
                     <Icon />
@@ -181,6 +195,7 @@ const Sidebar = ({
                   to={item.path}
                   className={getLinkClassName}
                   title={isCollapsed ? item.label : undefined}
+                  onClick={onClose}
                 >
                   <span className="dashboard-sidebar__link-icon">
                     <Icon />
@@ -207,7 +222,7 @@ const Sidebar = ({
               Upload your latest resume to receive better AI recommendations.
             </p>
 
-            <NavLink to="/dashboard/resumes">
+            <NavLink to="/dashboard/resumes" onClick={onClose}>
               Upload resume
               <FiChevronRight />
             </NavLink>
