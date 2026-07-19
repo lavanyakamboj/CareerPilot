@@ -1,26 +1,32 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+const crypto = require("crypto");
+
+const uploadDir = path.join(__dirname, "..", "uploads", "resumes");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/resumes");
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
+    const randomName = crypto.randomBytes(24).toString("hex");
+    cb(null, `${Date.now()}-${randomName}.pdf`);
   },
 });
 
 const fileFilter = function (req, file, cb) {
-  const allowedTypes = /pdf|doc|docx/;
-  const extName = allowedTypes.test(
-    path.extname(file.originalname).toLowerCase()
-  );
+  const hasValidExtension = /\.pdf$/i.test(file.originalname);
+  const hasValidMimeType = file.mimetype === "application/pdf";
 
-  if (extName) {
+  if (hasValidExtension && hasValidMimeType) {
     cb(null, true);
   } else {
-    cb(new Error("Only PDF, DOC, and DOCX files are allowed"));
+    cb(new Error("Only PDF files are allowed"));
   }
 };
 
@@ -28,8 +34,9 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024, // 5MB
+    files: 1,
   },
 });
 
-module.exports = upload;
+module.exports = { upload, uploadDir };

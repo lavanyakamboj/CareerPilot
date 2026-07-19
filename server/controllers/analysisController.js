@@ -63,8 +63,13 @@ const analyzeResume = async (req, res) => {
 // GET /api/analysis
 const getAllAnalyses = async (req, res) => {
 	try {
+		// Pehle sirf "resume provider score summary createdAt" select ho
+		// raha tha, isliye strengths/weaknesses/missingSkills/etc. list me
+		// kabhi aate hi nahi the aur Analysis page par empty dikhte the.
+		// Ab poora document bhejte hain taaki UI directly latest analysis
+		// (jo isi list se dhoonda jaata hai) me strengths/weaknesses dikha
+		// sake.
 		const analyses = await Analysis.find({ user: req.user._id })
-			.select("resume provider score summary createdAt")
 			.populate("resume", "originalName filename createdAt")
 			.sort({ createdAt: -1 });
 

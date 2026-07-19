@@ -148,7 +148,7 @@ const getDashboardSummary = async (req, res) => {
       Analysis.find({ user: userId })
         .sort({ createdAt: -1 })
         .limit(2)
-        .select("score summary createdAt")
+        .select("score summary strengths improvementTips createdAt")
         .lean(),
 
       Roadmap.findOne({ user: userId })
@@ -221,6 +221,8 @@ const getDashboardSummary = async (req, res) => {
         latestResume,
         latestScore: latestAnalysis?.score || null,
         latestSummary: latestAnalysis?.summary || null,
+        strengths: latestAnalysis?.strengths || [],
+        improvementTips: latestAnalysis?.improvementTips || [],
         scoreTrend,
       },
 

@@ -3,11 +3,32 @@ const router = express.Router();
 const fs = require("fs");
 const path = require("path");
 
-const pdfParse = require("pdf-parse");
+const { PDFParse } = require("pdf-parse");
 
 const { protect } = require("../middleware/authMiddleware");
-const upload = require("../middleware/uploadMiddleware");
+const { upload, uploadDir } = require("../middleware/uploadMiddleware");
 const Resume = require("../models/resumeModel");
+
+const extractPdfText = async (fileBuffer) => {
+	const parser = new PDFParse({ data: fileBuffer });
+
+	try {
+		const result = await parser.getText();
+		return result.text || "";
+	} finally {
+		await parser.destroy();
+	}
+};
+
+const isPdfSignatureValid = (buffer) =>
+	buffer.length > 5 && buffer.subarray(0, 5).toString("ascii") === "%PDF-";
+
+const sanitizeOriginalName = (name) =>
+	name
+		.replace(/[\/\\]/g, "_")
+		.replace(/[\x00-\x1f\x7f]/g, "")
+		.trim()
+		.slice(0, 150) || "resume.pdf";
 
 // Test route to check protected resume route
 router.get("/test", protect, (req, res) => {
@@ -20,13 +41,48 @@ router.get("/test", protect, (req, res) => {
 // Upload a new resume
 router.post("/upload", protect, upload.single("resume"), async (req, res) => {
 	try {
+		if (!req.file) {
+			return res.status(400).json({
+				message:
+					"No file received. Please attach a PDF resume file.",
+			});
+		}
+
+		const fileBuffer = fs.readFileSync(req.file.path);
+
+		if (!isPdfSignatureValid(fileBuffer)) {
+			fs.unlinkSync(req.file.path);
+
+			return res.status(400).json({
+				message:
+					"This file doesn't look like a valid PDF. Please upload a genuine PDF file.",
+			});
+		}
+
+		const relativeFilePath = path.relative(
+			path.join(__dirname, ".."),
+			req.file.path,
+		);
+
+		let extractedText = "";
+
+		try {
+			extractedText = await extractPdfText(fileBuffer);
+		} catch (extractError) {
+			console.error(
+				"Auto text extraction failed:",
+				extractError.message,
+			);
+		}
+
 		const resume = await Resume.create({
 			user: req.user._id,
-			originalName: req.file.originalname,
+			originalName: sanitizeOriginalName(req.file.originalname),
 			filename: req.file.filename,
-			filePath: req.file.path,
+			filePath: relativeFilePath,
 			fileSize: req.file.size,
 			fileType: req.file.mimetype,
+			extractedText,
 		});
 
 		res.status(201).json({
@@ -86,10 +142,10 @@ router.get("/:id/extract-text", protect, async (req, res) => {
 		}
 
 		const fileBuffer = fs.readFileSync(filePath);
-		const pdfData = await pdfParse(fileBuffer);
+		const extractedText = await extractPdfText(fileBuffer);
 
 		// Save extracted text in MongoDB
-		resume.extractedText = pdfData.text;
+		resume.extractedText = extractedText;
 		await resume.save();
 
 		res.status(200).json({

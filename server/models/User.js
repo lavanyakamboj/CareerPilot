@@ -17,11 +17,62 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      minlength: 8,
+      select: false, // default query me password kabhi nahi aayega
+    },
+
+    // --- Email verification ---
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationTokenHash: {
+      type: String,
+      select: false,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false,
+    },
+
+    // --- Forgot / reset password (OTP + link dono support karta hai) ---
+    resetPasswordOtpHash: {
+      type: String,
+      select: false,
+    },
+    resetPasswordTokenHash: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      select: false,
+    },
+
+    // --- Brute-force / bot protection: login lockout ---
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+    lockUntil: {
+      type: Date,
+      select: false,
+    },
+
+    // Password kab last change hui — purane JWT (issue-time se pehle ke)
+    // ko automatically invalid karne ke liye use hota hai.
+    passwordChangedAt: {
+      type: Date,
+      select: false,
     },
   },
   { timestamps: true } // stores 2 fields createdAt and updatedAt
 );
+
+userSchema.methods.isLocked = function () {
+  return Boolean(this.lockUntil && this.lockUntil > Date.now());
+};
 
 const User = mongoose.model("User", userSchema);
 
