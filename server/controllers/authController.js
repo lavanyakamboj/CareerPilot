@@ -1,4 +1,7 @@
 const bcrypt = require("bcryptjs");
+const { OAuth2Client } = require("google-auth-library");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const User = require("../models/User");
 const { signToken, verifyToken } = require("../utils/jwtUtils");
@@ -180,6 +183,13 @@ const loginUser = async (req, res) => {
       });
     }
 
+    if (!user.password) {
+      // Google account — normal password se login nahi ho sakta.
+      return res.status(400).json({
+        message: "This account uses Google sign-in. Please continue with Google.",
+      });
+    }
+
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
@@ -331,6 +341,65 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// ------------------------------------------------------------------
+// Google login/signup — frontend se ID token aata hai, hum usko
+// Google ke saath verify karte hain (yeh step spoofing rokta hai —
+// koi bhi random token bhej ke login nahi kar sakta).
+// ------------------------------------------------------------------
+const googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: "Google credential is required." });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload?.email) {
+      return res.status(400).json({ message: "Could not read email from Google account." });
+    }
+
+    let user = await User.findOne({
+      $or: [{ googleId: payload.sub }, { email: payload.email }],
+    });
+
+    if (user) {
+      // Existing local account jo same email se hai — usko Google se link kar dete hain.
+      if (!user.googleId) {
+        user.googleId = payload.sub;
+        user.authProvider = "google";
+        user.isEmailVerified = true;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        name: payload.name || payload.email.split("@")[0],
+        email: payload.email,
+        googleId: payload.sub,
+        authProvider: "google",
+        isEmailVerified: true,
+      });
+    }
+
+    const token = signToken({ id: user._id });
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: buildUserResponse(user),
+    });
+  } catch (error) {
+    console.error("Google auth error:", error.message);
+    res.status(400).json({ message: "Google sign-in failed. Please try again." });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -339,4 +408,5 @@ module.exports = {
   resendVerificationEmail,
   forgotPassword,
   resetPassword,
+  googleAuth,
 };

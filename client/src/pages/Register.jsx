@@ -14,9 +14,9 @@ import {
   FiUser,
 } from "react-icons/fi";
 
-import { FcGoogle } from "react-icons/fc";
+import { GoogleLogin } from "@react-oauth/google";
 
-import { registerUser } from "../services/authApi";
+import { registerUser, googleAuth } from "../services/authApi";
 
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthInput from "../components/auth/AuthInput";
@@ -180,10 +180,24 @@ const Register = () => {
     }
   };
 
-  const handleGoogleRegister = () => {
-    toast(
-      "Google registration will be available soon.",
-    );
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setIsSubmitting(true);
+
+      const data = await googleAuth(credentialResponse.credential);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      toast.success("Account ready!");
+      navigate("/dashboard", { replace: true });
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Google sign-in failed. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -204,15 +218,14 @@ const Register = () => {
         </p>
       </div>
 
-      <button
-        type="button"
-        className="auth-google-button"
-        onClick={handleGoogleRegister}
-        disabled={isSubmitting}
-      >
-        <FcGoogle />
-        Continue with Google
-      </button>
+      <div className="auth-google-button-wrapper">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => toast.error("Google sign-in failed. Please try again.")}
+          width="100%"
+          text="signup_with"
+        />
+      </div>
 
       <div className="auth-divider">
         <span />
@@ -317,7 +330,7 @@ const Register = () => {
               and
               <Link to="/privacy">
                 {" "}
-                Privacy Policy
+                Privacy Policy{" "}
               </Link>
               .
             </span>

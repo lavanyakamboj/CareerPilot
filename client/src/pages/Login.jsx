@@ -14,9 +14,9 @@ import {
   FiMail,
 } from "react-icons/fi";
 
-import { FcGoogle } from "react-icons/fc";
+import { GoogleLogin } from "@react-oauth/google";
 
-import { loginUser, resendVerificationEmail } from "../services/authApi";
+import { loginUser, resendVerificationEmail, googleAuth } from "../services/authApi";
 
 import AuthLayout from "../components/auth/AuthLayout";
 import AuthInput from "../components/auth/AuthInput";
@@ -185,10 +185,24 @@ const handleSubmit = async (event) => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    toast(
-      "Google login will be available soon.",
-    );
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setIsSubmitting(true);
+
+      const data = await googleAuth(credentialResponse.credential);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      toast.success("Login successful!");
+      navigate(location.state?.from || "/dashboard", { replace: true });
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Google sign-in failed. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -206,15 +220,14 @@ const handleSubmit = async (event) => {
         </p>
       </div>
 
-      <button
-        type="button"
-        className="auth-google-button"
-        onClick={handleGoogleLogin}
-        disabled={isSubmitting}
-      >
-        <FcGoogle />
-        Continue with Google
-      </button>
+      <div className="auth-google-button-wrapper">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => toast.error("Google sign-in failed. Please try again.")}
+          width="100%"
+          text="continue_with"
+        />
+      </div>
 
       {justRegistered && (
         <p className="auth-info-banner">
@@ -339,7 +352,7 @@ const handleSubmit = async (event) => {
         and
         <Link to="/privacy">
           {" "}
-          Privacy Policy
+          Privacy Policy{" "}
         </Link>
         .
       </p>

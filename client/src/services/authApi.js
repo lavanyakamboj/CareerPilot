@@ -12,6 +12,12 @@ export const loginUser = async (credentials) => {
   return response.data;
 };
 
+export const googleAuth = async (credential) => {
+  const response = await api.post("/auth/google", { credential });
+
+  return response.data;
+};
+
 export const logoutUser = async () => {
   const response = await api.post("/auth/logout");
 

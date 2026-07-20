@@ -150,6 +150,7 @@
 .feature-panel {
   min-width: 0;
   padding: 24px;
+  margin-top: 15px;
 
   border: 1px solid var(--color-border-light);
   border-radius: 22px;

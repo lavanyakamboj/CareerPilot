@@ -16,7 +16,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.authProvider === "local";
+      },
       minlength: 8,
       select: false, // default query me password kabhi nahi aayega
     },
@@ -66,6 +68,18 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+
+    // --- Google OAuth ---
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // taaki normal users ke liye null-null duplicate error na aaye
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
   },
   { timestamps: true } // stores 2 fields createdAt and updatedAt
 );
@@ -76,4 +90,4 @@ userSchema.methods.isLocked = function () {
 
 const User = mongoose.model("User", userSchema);
 
-module.exports = User; 
+module.exports = User;

@@ -8,6 +8,7 @@ const {
   resendVerificationEmail,
   forgotPassword,
   resetPassword,
+  googleAuth,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 const {
@@ -43,6 +44,8 @@ router.post(
   handleValidationErrors,
   loginUser,
 );
+
+router.post("/google", loginLimiter, googleAuth);
 
 router.post("/logout", protect, logoutUser);
 
